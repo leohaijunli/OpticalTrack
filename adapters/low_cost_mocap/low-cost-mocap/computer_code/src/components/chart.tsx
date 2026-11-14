@@ -1,0 +1,270 @@
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ChartData,
+  ChartOptions,
+} from 'chart.js';
+import { MutableRefObject, useEffect, useRef } from 'react';
+import { Line } from 'react-chartjs-2';
+import { TrackedObject } from '../types/tracking';
+// @ts-ignore
+import Controller from 'node-pid-controller'
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+export const options: ChartOptions<'line'> = {
+  animation: false,
+  responsive: true,
+  spanGaps: false,
+  maintainAspectRatio: false,
+  showLine: true,
+  plugins: {
+    tooltip: {
+      enabled: false,
+    },
+    legend: {
+      align: 'start',
+    },
+    title: {
+      display: true,
+      text: 'Drone Position',
+    },
+  },
+  scales: {
+    A: {
+      type: 'linear',
+      position: 'left',
+    }, 
+    B: {
+      type: 'linear',
+      position: 'left',
+      max: Math.PI/2,
+      min: -Math.PI/2
+    }, 
+    C: {
+      type: 'linear',
+      position: 'left'
+    }
+  },
+  elements: {
+    point: {
+        radius: 0 // default to disabled in all datasets
+    }
+  }
+};
+
+type Samples = (number | null)[];
+const dataTemplate: ChartData<"line", Samples, number> = {
+  labels: [] as number[],
+  datasets: [
+    {
+      label: 'X',
+      data: [] as number[],
+      borderColor: 'rgb(255, 0, 0)',
+      backgroundColor: 'rgba(255, 0, 0, 0.5)',
+      yAxisID: "A",
+    },
+    {
+      label: 'Y',
+      data: [] as number[],
+      borderColor: 'rgb(0, 255, 0)',
+      backgroundColor: 'rgba(0, 255, 0, 0.5)',
+      yAxisID: "A"
+    },
+    {
+      label: 'Z',
+      data: [] as number[],
+      borderColor: 'rgb(0, 0, 255)',
+      backgroundColor: 'rgba(0, 0, 255, 0.5)',
+      yAxisID: "A",
+    },
+    {
+      label: 'Base axis (rad)',
+      data: [] as number[],
+      borderColor: 'rgb(128, 128, 128)',
+      backgroundColor: 'rgba(128, 128, 128, 0.5)',
+      yAxisID: "B"
+    },
+    {
+      label: 'X Vel',
+      data: [] as number[],
+      borderColor: 'rgb(220, 220, 0)',
+      backgroundColor: 'rgba(220, 220, 0, 0.5)',
+      yAxisID: "C"
+    },
+    {
+      label: 'Y Vel',
+      data: [] as number[],
+      borderColor: 'rgb(0, 220, 220)',
+      backgroundColor: 'rgba(0, 220, 220, 0.5)',
+      yAxisID: "C"
+    },
+    {
+      label: 'Z Vel',
+      data: [] as number[],
+      borderColor: 'rgb(220, 0, 220)',
+      backgroundColor: 'rgba(220, 0, 220, 0.5)',
+      yAxisID: "C"
+    },
+    {
+      label: 'X Setpoint',
+      data: [] as number[],
+      borderColor: 'rgb(128, 0, 0)',
+      backgroundColor: 'rgba(128, 0, 0, 0.5)',
+      yAxisID: "A"
+    },
+    {
+      label: 'Y Setpoint',
+      data: [] as number[],
+      borderColor: 'rgb(0, 128, 0)',
+      backgroundColor: 'rgba(0, 128, 0, 0.5)',
+      yAxisID: "A",
+    },
+    {
+      label: 'Z Setpoint',
+      data: [] as number[],
+      borderColor: 'rgb(0, 0, 128)',
+      backgroundColor: 'rgba(0, 0, 128, 0.5)',
+      yAxisID: "A"
+    },
+    {
+      label: 'X Vel Setpoint',
+      data: [] as number[],
+      borderColor: 'rgb(128, 128, 0)',
+      backgroundColor: 'rgba(128, 128, 0, 0.5)',
+      yAxisID: "C"
+    },
+    {
+      label: 'Y Vel Setpoint',
+      data: [] as number[],
+      borderColor: 'rgb(0, 128, 128)',
+      backgroundColor: 'rgba(0, 128, 128, 0.5)',
+      yAxisID: "C"
+    },
+    {
+      label: 'Z Vel Setpoint',
+      data: [] as number[],
+      borderColor: 'rgb(128, 0, 128)',
+      backgroundColor: 'rgba(128, 0, 128, 0.5)',
+      yAxisID: "C"
+    },
+  ],
+};
+
+let data = structuredClone(dataTemplate)
+
+let xPosPID = new Controller();
+let yPosPID = new Controller();
+let zPosPID = new Controller();
+
+export default function Chart({filteredObjectsRef, droneSetpointHistoryRef, objectPointCount, dronePID, droneArmed, currentDroneIndex}: 
+  {filteredObjectsRef: MutableRefObject<TrackedObject[][]>, droneSetpointHistoryRef: MutableRefObject<number[][]>, objectPointCount: number, dronePID: number[], droneArmed: boolean[], currentDroneIndex: number}) {
+  const chartRef = useRef<ChartJS<"line", Samples, number> | null>(null);
+  const lastCapture = useRef(-1);
+  const lastBody = useRef(currentDroneIndex);
+
+  useEffect(() => {
+    const captures = filteredObjectsRef.current
+    const length = captures.length
+    if (length === 0 || lastBody.current !== currentDroneIndex) {
+      data = structuredClone(dataTemplate)
+      lastCapture.current = -1
+      lastBody.current = currentDroneIndex
+    }
+    if (length && objectPointCount !== lastCapture.current) {
+      lastCapture.current = objectPointCount
+      data.labels!.push(objectPointCount)
+      const lastFilteredPoint = captures[length-1].find(x => x.droneIndex === currentDroneIndex)
+      const setpoint = droneSetpointHistoryRef.current[length-1] ?? []
+  
+      if (lastFilteredPoint !== undefined) {
+        data.datasets[0].data.push(lastFilteredPoint["pos"][0])
+        data.datasets[1].data.push(lastFilteredPoint["pos"][1])
+        data.datasets[2].data.push(lastFilteredPoint["pos"][2])
+    
+        data.datasets[3].data.push(lastFilteredPoint["heading"])
+        
+        if (lastFilteredPoint["vel"]) {
+          data.datasets[4].data.push(lastFilteredPoint["vel"][0])
+          data.datasets[5].data.push(lastFilteredPoint["vel"][1])
+          data.datasets[6].data.push(lastFilteredPoint["vel"][2])
+        }
+        else {
+          data.datasets[4].data.push(null)
+          data.datasets[5].data.push(null)
+          data.datasets[6].data.push(null)
+        }
+        
+        data.datasets[7].data.push(setpoint[0] ?? null)
+        data.datasets[8].data.push(setpoint[1] ?? null)
+        data.datasets[9].data.push(setpoint[2] ?? null)
+    
+        if (setpoint.length != 0) {
+          xPosPID.setTarget(setpoint[0])
+          yPosPID.setTarget(setpoint[1])
+          zPosPID.setTarget(setpoint[2])
+        }
+        
+        if (lastFilteredPoint["pos"].length != 0) {
+          data.datasets[10].data.push(xPosPID.update(lastFilteredPoint["pos"][0]))
+          data.datasets[11].data.push(yPosPID.update(lastFilteredPoint["pos"][1]))
+          data.datasets[12].data.push(zPosPID.update(lastFilteredPoint["pos"][2]))
+        }
+        else {
+          data.datasets[10].data.push(null)
+          data.datasets[11].data.push(null)
+          data.datasets[12].data.push(null)
+        }
+      } else {
+        data.datasets.forEach(dataset => dataset.data.push(null))
+      }
+      if (data.labels!.length > 600) {
+        data.labels!.shift()
+        data.datasets.forEach(dataset => dataset.data.shift())
+      }
+    }
+
+    if (chartRef.current) {
+      chartRef.current.data = data
+      chartRef.current.update('none')
+    }
+  }, [objectPointCount, currentDroneIndex])
+
+  useEffect(() => {
+    xPosPID.k_p = dronePID[0]
+    xPosPID.k_i = dronePID[1]
+    xPosPID.k_d = dronePID[2]
+
+    yPosPID.k_p = dronePID[0]
+    yPosPID.k_i = dronePID[1]
+    yPosPID.k_d = dronePID[2]
+
+    zPosPID.k_p = dronePID[3]
+    zPosPID.k_i = dronePID[4]
+    zPosPID.k_d = dronePID[5]
+  }, [dronePID])
+
+  useEffect(() => {
+    if (droneArmed) {
+      xPosPID.reset()
+      yPosPID.reset()
+      zPosPID.reset()
+    }
+  }, [droneArmed, currentDroneIndex])
+
+  return <Line ref={chartRef} options={options} data={data} height={"50px"}/>;
+}
