@@ -1,0 +1,25 @@
+mocap-sim consistency report
+===========================
+frames            : 600
+cameras           : 6
+markers per body  : 3
+detections        : 9454
+detections/frame  : 15.76
+triangulation rms : 0.0365 px (mean over 1800 marker-frames)
+6DOF position err : 0.22 mm mean
+6DOF rotation err : 0.441 deg mean
+frames w/ <2 views for some marker: 0
+frames w/ <3 solvable markers      : 0
+
+per camera detections:
+  CAM01     85.72% of frames have this marker set visible? 1543
+  CAM02     87.06% of frames have this marker set visible? 1567
+  CAM03     85.61% of frames have this marker set visible? 1541
+  CAM04     90.17% of frames have this marker set visible? 1623
+  CAM05     86.00% of frames have this marker set visible? 1548
+  CAM06     90.67% of frames have this marker set visible? 1632
+
+per marker detections:
+  marker 0  3166 (87.9%)
+  marker 1  3160 (87.8%)
+  marker 2  3128 (86.9%)

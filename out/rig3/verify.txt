@@ -1,0 +1,12 @@
+mocap-sim consistency report (multi-body)
+=========================================
+frames            : 600
+cameras           : 6
+bodies            : 3
+  body 0 T650-A   frame tarot650_x   ref(base,apex)=(0.460,0.569) m markers=4 extras=[3]
+  body 1 T650-B   frame tarot650_fwd ref(base,apex)=(0.280,0.340) m markers=4 extras=[3]
+  body 2 T650-C   frame tarot650_rev ref(base,apex)=(0.340,0.444) m markers=4 extras=[3]
+detections        : 41914
+triangulation rms : 0.0377 px (mean over 7200 marker-frames)
+6DOF position err : 0.163 mm mean
+6DOF rotation err : 0.037 deg mean

@@ -1,0 +1,87 @@
+{
+  "tag": "t650",
+  "resolution": [
+    1280,
+    800
+  ],
+  "fps": 30,
+  "frames": [
+    0,
+    599
+  ],
+  "frame_count": 600,
+  "source_sha256": {
+    "scenario": "21210f399cc4c0c7d02c5bca80fbcf060d887ba5124b6ee7bebed632223b481d",
+    "rig": "3635defc5818840fb0947999a9e8105da14d02827482594fd250b9a72e6b3ed3",
+    "scene_script": "667c67b3237dae0f9ede254829fc0a152a82c2908a66cbf8a595e5b6691784d6",
+    "appearance": "600f342cdb1ba6fb6ee240425aa797f22e427ec4fc34627237ae8a43886fab61"
+  },
+  "clips": [
+    {
+      "camera": "CAM01",
+      "clean": {
+        "file": "01_cam01_t650_20s.mp4",
+        "sha256": "98758d2773a6884d9624c260dbaf39a460b7e4cd8aeb74637ddfb0e070533bf3"
+      },
+      "hud": {
+        "file": "01_cam01_t650_20s_hud.mp4",
+        "sha256": "d7cb44debb7e5abdb213850b2b15f198efdc89875d85af14f60b8486c87a357d"
+      }
+    },
+    {
+      "camera": "CAM02",
+      "clean": {
+        "file": "02_cam02_t650_20s.mp4",
+        "sha256": "b979da1ae66d16aa711d19e01bcc7c25d8230cff49547f0a940353415893b3ce"
+      },
+      "hud": {
+        "file": "02_cam02_t650_20s_hud.mp4",
+        "sha256": "af70bd03fe5087c16aebab4bcfa67cca34590047cee2559bda2f22ee3a717960"
+      }
+    },
+    {
+      "camera": "CAM03",
+      "clean": {
+        "file": "03_cam03_t650_20s.mp4",
+        "sha256": "78fb56e3085900f7beb542724408c81a7a170eea058f97ba0dbce793f0a6db4c"
+      },
+      "hud": {
+        "file": "03_cam03_t650_20s_hud.mp4",
+        "sha256": "2ca3df94634820f02d74bde08772134456a70eab384d851d3b60a15aa918207c"
+      }
+    },
+    {
+      "camera": "CAM04",
+      "clean": {
+        "file": "04_cam04_t650_20s.mp4",
+        "sha256": "0d6739b5c3ce818e1fde8777d3a09b94d579a84dbfead1496a4c21b0d3d7ea7a"
+      },
+      "hud": {
+        "file": "04_cam04_t650_20s_hud.mp4",
+        "sha256": "c6c7056d876acdc0352020a6791a9bb663b84f3e44a4e8b504f1ce5c72681dab"
+      }
+    },
+    {
+      "camera": "CAM05",
+      "clean": {
+        "file": "05_cam05_t650_20s.mp4",
+        "sha256": "e0273fbae047ef4612babfb429c744345d18b174674cf0f59e3c9dd737201b68"
+      },
+      "hud": {
+        "file": "05_cam05_t650_20s_hud.mp4",
+        "sha256": "77edb3fb8f83010fbc600ea8771c2825ea45204a7c490312c061d4fee925c73b"
+      }
+    },
+    {
+      "camera": "CAM06",
+      "clean": {
+        "file": "06_cam06_t650_20s.mp4",
+        "sha256": "00c8ed1bdfc14dd5f48ad673c577a01b96e4efb3c5d47e915bfa0ca9d192ccdd"
+      },
+      "hud": {
+        "file": "06_cam06_t650_20s_hud.mp4",
+        "sha256": "9fbc99ee61c70c7ab871fc199cf48ec0eb8bee4d1693e8fd53fd4096f8107d8f"
+      }
+    }
+  ]
+}

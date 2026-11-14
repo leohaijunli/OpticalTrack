@@ -1,0 +1,1103 @@
+{
+  "threshold": 140,
+  "blur_size": 9,
+  "frames": [
+    38,
+    300
+  ],
+  "datasets": {
+    "baseline": {
+      "pattern": "{cam}_t650",
+      "summary": {
+        "detections": 167,
+        "projected_markers": 108,
+        "matched_markers": 104,
+        "false_blobs": 63,
+        "motor_false_blobs": 52,
+        "motor_patch_max_after_blur": 199
+      },
+      "rows": [
+        {
+          "detections": 16,
+          "projected_markers": 9,
+          "matched_markers": 7,
+          "false_blobs": 9,
+          "motor_false_blobs": 7,
+          "false_blob_pixels": [
+            [
+              559,
+              383
+            ],
+            [
+              737,
+              387
+            ],
+            [
+              619,
+              397
+            ],
+            [
+              630,
+              399
+            ],
+            [
+              781,
+              403
+            ],
+            [
+              704,
+              424
+            ],
+            [
+              745,
+              443
+            ],
+            [
+              64,
+              687
+            ],
+            [
+              75,
+              696
+            ]
+          ],
+          "motor_patch_max_after_blur": 191,
+          "led_patch_peaks_after_blur": [
+            205,
+            188,
+            184,
+            205,
+            206,
+            197,
+            205,
+            186,
+            185
+          ],
+          "matched_errors_px": [
+            2.331852382489312,
+            2.1539660758656236,
+            1.5233985704862076,
+            3.7239141693451967,
+            1.5253476697714121,
+            1.9577250140108073,
+            1.402060000409681
+          ],
+          "frame": 38,
+          "camera": "CAM01"
+        },
+        {
+          "detections": 9,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 0,
+          "motor_false_blobs": 0,
+          "false_blob_pixels": [],
+          "motor_patch_max_after_blur": 132,
+          "led_patch_peaks_after_blur": [
+            184,
+            188,
+            190,
+            197,
+            203,
+            201,
+            190,
+            192,
+            195
+          ],
+          "matched_errors_px": [
+            1.3903602148876513,
+            1.737943141726533,
+            1.5049919154185891,
+            1.2304825597265916,
+            1.7714654554008815,
+            2.1404828335663875,
+            1.2396008664325315,
+            1.8905391945802181,
+            1.7228498875855298
+          ],
+          "frame": 38,
+          "camera": "CAM02"
+        },
+        {
+          "detections": 19,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 10,
+          "motor_false_blobs": 7,
+          "false_blob_pixels": [
+            [
+              630,
+              236
+            ],
+            [
+              636,
+              270
+            ],
+            [
+              599,
+              279
+            ],
+            [
+              671,
+              274
+            ],
+            [
+              634,
+              282
+            ],
+            [
+              642,
+              319
+            ],
+            [
+              600,
+              473
+            ],
+            [
+              637,
+              491
+            ],
+            [
+              675,
+              508
+            ],
+            [
+              617,
+              510
+            ]
+          ],
+          "motor_patch_max_after_blur": 193,
+          "led_patch_peaks_after_blur": [
+            189,
+            196,
+            195,
+            194,
+            197,
+            194,
+            193,
+            200,
+            197
+          ],
+          "matched_errors_px": [
+            1.213955842812694,
+            1.6411979603932219,
+            1.8048759254855231,
+            1.2637030705736443,
+            1.4572033116178031,
+            0.5387841941322925,
+            1.1964890008025695,
+            2.8906569097095223,
+            0.851868849649824
+          ],
+          "frame": 38,
+          "camera": "CAM03"
+        },
+        {
+          "detections": 13,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 4,
+          "motor_false_blobs": 4,
+          "false_blob_pixels": [
+            [
+              706,
+              445
+            ],
+            [
+              725,
+              446
+            ],
+            [
+              648,
+              457
+            ],
+            [
+              664,
+              460
+            ]
+          ],
+          "motor_patch_max_after_blur": 186,
+          "led_patch_peaks_after_blur": [
+            192,
+            193,
+            198,
+            194,
+            196,
+            194,
+            186,
+            188,
+            191
+          ],
+          "matched_errors_px": [
+            1.2141752602568596,
+            1.534754609505738,
+            1.8132030119674507,
+            0.8400674107469966,
+            0.8891590819696849,
+            1.0333606883487096,
+            1.98893201664858,
+            1.3761132278941701,
+            1.323652744681502
+          ],
+          "frame": 38,
+          "camera": "CAM04"
+        },
+        {
+          "detections": 12,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 3,
+          "motor_false_blobs": 3,
+          "false_blob_pixels": [
+            [
+              576,
+              420
+            ],
+            [
+              621,
+              454
+            ],
+            [
+              650,
+              457
+            ]
+          ],
+          "motor_patch_max_after_blur": 169,
+          "led_patch_peaks_after_blur": [
+            193,
+            186,
+            196,
+            195,
+            198,
+            198,
+            185,
+            178,
+            186
+          ],
+          "matched_errors_px": [
+            1.8981450813387148,
+            1.0523693098211258,
+            0.26139774111035075,
+            1.6682936876212682,
+            1.749549134208828,
+            2.0838128798574997,
+            1.3345804701074209,
+            1.0092029716315207,
+            1.1031485910807246
+          ],
+          "frame": 38,
+          "camera": "CAM05"
+        },
+        {
+          "detections": 13,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 4,
+          "motor_false_blobs": 4,
+          "false_blob_pixels": [
+            [
+              740,
+              385
+            ],
+            [
+              690,
+              408
+            ],
+            [
+              710,
+              412
+            ],
+            [
+              658,
+              435
+            ]
+          ],
+          "motor_patch_max_after_blur": 186,
+          "led_patch_peaks_after_blur": [
+            190,
+            190,
+            186,
+            203,
+            205,
+            202,
+            188,
+            188,
+            184
+          ],
+          "matched_errors_px": [
+            1.6536363143193995,
+            1.60682638482625,
+            1.8097748973372774,
+            1.5010504992848004,
+            2.0935162881885954,
+            1.5849998553284892,
+            1.2313828916300404,
+            2.0096459305413266,
+            1.4771565666970967
+          ],
+          "frame": 38,
+          "camera": "CAM06"
+        },
+        {
+          "detections": 15,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 6,
+          "motor_false_blobs": 3,
+          "false_blob_pixels": [
+            [
+              684,
+              354
+            ],
+            [
+              626,
+              364
+            ],
+            [
+              657,
+              376
+            ],
+            [
+              641,
+              406
+            ],
+            [
+              64,
+              687
+            ],
+            [
+              75,
+              696
+            ]
+          ],
+          "motor_patch_max_after_blur": 195,
+          "led_patch_peaks_after_blur": [
+            197,
+            193,
+            194,
+            198,
+            206,
+            203,
+            185,
+            179,
+            183
+          ],
+          "matched_errors_px": [
+            1.6349867127702422,
+            1.6207000112299332,
+            1.4367472650723385,
+            1.3023693976477435,
+            1.3968265789541854,
+            1.046142249740814,
+            1.989183622448244,
+            1.456022312959379,
+            1.529093176337172
+          ],
+          "frame": 300,
+          "camera": "CAM01"
+        },
+        {
+          "detections": 9,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 0,
+          "motor_false_blobs": 0,
+          "false_blob_pixels": [],
+          "motor_patch_max_after_blur": 122,
+          "led_patch_peaks_after_blur": [
+            193,
+            194,
+            193,
+            189,
+            198,
+            197,
+            196,
+            193,
+            194
+          ],
+          "matched_errors_px": [
+            1.6376632430937768,
+            1.6179135658164545,
+            1.3171042780924935,
+            2.5401804025681463,
+            1.4147025846026218,
+            1.6721203952288555,
+            1.7114039081795762,
+            1.5077912169106695,
+            1.7767903632594317
+          ],
+          "frame": 300,
+          "camera": "CAM02"
+        },
+        {
+          "detections": 12,
+          "projected_markers": 9,
+          "matched_markers": 8,
+          "false_blobs": 4,
+          "motor_false_blobs": 3,
+          "false_blob_pixels": [
+            [
+              643,
+              355
+            ],
+            [
+              701,
+              369
+            ],
+            [
+              665,
+              380
+            ],
+            [
+              686,
+              408
+            ]
+          ],
+          "motor_patch_max_after_blur": 188,
+          "led_patch_peaks_after_blur": [
+            197,
+            197,
+            196,
+            176,
+            196,
+            193,
+            205,
+            199,
+            201
+          ],
+          "matched_errors_px": [
+            0.5842137931688383,
+            1.405799337338312,
+            1.4059655046437078,
+            1.3551746256724164,
+            1.8308512373162888,
+            2.2077924600173224,
+            1.2293691056205787,
+            1.15358884987211
+          ],
+          "frame": 300,
+          "camera": "CAM03"
+        },
+        {
+          "detections": 19,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 10,
+          "motor_false_blobs": 9,
+          "false_blob_pixels": [
+            [
+              833,
+              245
+            ],
+            [
+              853,
+              273
+            ],
+            [
+              816,
+              274
+            ],
+            [
+              782,
+              274
+            ],
+            [
+              797,
+              304
+            ],
+            [
+              685,
+              354
+            ],
+            [
+              626,
+              363
+            ],
+            [
+              642,
+              406
+            ],
+            [
+              481,
+              515
+            ],
+            [
+              536,
+              525
+            ]
+          ],
+          "motor_patch_max_after_blur": 199,
+          "led_patch_peaks_after_blur": [
+            192,
+            193,
+            187,
+            191,
+            195,
+            193,
+            194,
+            192,
+            198
+          ],
+          "matched_errors_px": [
+            1.434306251837287,
+            1.4575639832379357,
+            1.0983397071936125,
+            1.2283078770778226,
+            0.9790915281984528,
+            1.6495452109271014,
+            1.7843181856571069,
+            1.6143030480470957,
+            1.5570229176149877
+          ],
+          "frame": 300,
+          "camera": "CAM04"
+        },
+        {
+          "detections": 13,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 4,
+          "motor_false_blobs": 4,
+          "false_blob_pixels": [
+            [
+              844,
+              391
+            ],
+            [
+              898,
+              401
+            ],
+            [
+              799,
+              414
+            ],
+            [
+              853,
+              425
+            ]
+          ],
+          "motor_patch_max_after_blur": 156,
+          "led_patch_peaks_after_blur": [
+            192,
+            186,
+            192,
+            204,
+            202,
+            201,
+            188,
+            186,
+            188
+          ],
+          "matched_errors_px": [
+            1.5823589535194964,
+            1.7848471267082267,
+            0.8669546348637223,
+            1.6567602578582765,
+            1.7520606370406548,
+            1.2484008695115885,
+            1.2674247507569276,
+            1.6092262182016221,
+            1.4100320747889568
+          ],
+          "frame": 300,
+          "camera": "CAM05"
+        },
+        {
+          "detections": 17,
+          "projected_markers": 9,
+          "matched_markers": 8,
+          "false_blobs": 9,
+          "motor_false_blobs": 8,
+          "false_blob_pixels": [
+            [
+              637,
+              282
+            ],
+            [
+              627,
+              331
+            ],
+            [
+              643,
+              355
+            ],
+            [
+              700,
+              362
+            ],
+            [
+              667,
+              380
+            ],
+            [
+              645,
+              461
+            ],
+            [
+              711,
+              489
+            ],
+            [
+              626,
+              490
+            ],
+            [
+              697,
+              518
+            ]
+          ],
+          "motor_patch_max_after_blur": 162,
+          "led_patch_peaks_after_blur": [
+            198,
+            198,
+            192,
+            209,
+            213,
+            212,
+            182,
+            176,
+            185
+          ],
+          "matched_errors_px": [
+            2.485739190807788,
+            1.8061780502420857,
+            1.103439550287264,
+            1.9487767757797767,
+            1.0851156406024358,
+            1.6644394353319931,
+            1.2720048002928588,
+            1.7963398373102495
+          ],
+          "frame": 300,
+          "camera": "CAM06"
+        }
+      ]
+    },
+    "corrected": {
+      "pattern": "still_{cam}_led_pilot",
+      "summary": {
+        "detections": 111,
+        "projected_markers": 108,
+        "matched_markers": 107,
+        "false_blobs": 4,
+        "motor_false_blobs": 0,
+        "motor_patch_max_after_blur": 148
+      },
+      "rows": [
+        {
+          "detections": 10,
+          "projected_markers": 9,
+          "matched_markers": 8,
+          "false_blobs": 2,
+          "motor_false_blobs": 0,
+          "false_blob_pixels": [
+            [
+              64,
+              687
+            ],
+            [
+              75,
+              696
+            ]
+          ],
+          "motor_patch_max_after_blur": 97,
+          "led_patch_peaks_after_blur": [
+            170,
+            173,
+            177,
+            194,
+            196,
+            188,
+            162,
+            179,
+            178
+          ],
+          "matched_errors_px": [
+            0.4815855375474436,
+            0.8567933201069349,
+            1.5233985704862076,
+            3.4833998465894633,
+            1.5253476697714121,
+            0.9341723668974516,
+            1.9577250140108073,
+            1.402060000409681
+          ],
+          "frame": 38,
+          "camera": "CAM01"
+        },
+        {
+          "detections": 9,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 0,
+          "motor_false_blobs": 0,
+          "false_blob_pixels": [],
+          "motor_patch_max_after_blur": 102,
+          "led_patch_peaks_after_blur": [
+            176,
+            180,
+            185,
+            191,
+            188,
+            196,
+            180,
+            185,
+            187
+          ],
+          "matched_errors_px": [
+            1.3903602148876513,
+            1.737943141726533,
+            1.5049919154185891,
+            1.2304825597265916,
+            1.7714654554008815,
+            1.5862404010065558,
+            1.2396008664325315,
+            1.8905391945802181,
+            1.7228498875855298
+          ],
+          "frame": 38,
+          "camera": "CAM02"
+        },
+        {
+          "detections": 9,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 0,
+          "motor_false_blobs": 0,
+          "false_blob_pixels": [],
+          "motor_patch_max_after_blur": 148,
+          "led_patch_peaks_after_blur": [
+            183,
+            190,
+            190,
+            189,
+            194,
+            188,
+            187,
+            179,
+            187
+          ],
+          "matched_errors_px": [
+            1.213955842812694,
+            0.8628674719273567,
+            1.8048759254855231,
+            1.2637030705736443,
+            1.4572033116178031,
+            0.5387841941322925,
+            1.1964890008025695,
+            1.0912979581777673,
+            1.5854937312113586
+          ],
+          "frame": 38,
+          "camera": "CAM03"
+        },
+        {
+          "detections": 9,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 0,
+          "motor_false_blobs": 0,
+          "false_blob_pixels": [],
+          "motor_patch_max_after_blur": 101,
+          "led_patch_peaks_after_blur": [
+            183,
+            185,
+            191,
+            187,
+            192,
+            189,
+            178,
+            181,
+            185
+          ],
+          "matched_errors_px": [
+            1.2141752602568596,
+            1.534754609505738,
+            0.9733522772227303,
+            0.8400674107469966,
+            0.8891590819696849,
+            1.0333606883487096,
+            1.4908156933261303,
+            1.3761132278941701,
+            1.9200185532096146
+          ],
+          "frame": 38,
+          "camera": "CAM04"
+        },
+        {
+          "detections": 9,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 0,
+          "motor_false_blobs": 0,
+          "false_blob_pixels": [],
+          "motor_patch_max_after_blur": 97,
+          "led_patch_peaks_after_blur": [
+            185,
+            176,
+            185,
+            186,
+            189,
+            192,
+            179,
+            165,
+            181
+          ],
+          "matched_errors_px": [
+            1.0383804835306296,
+            1.0523693098211258,
+            1.6585001332664828,
+            1.6682936876212682,
+            1.749549134208828,
+            1.5381693402341658,
+            1.3345804701074209,
+            1.0092029716315207,
+            1.1031485910807246
+          ],
+          "frame": 38,
+          "camera": "CAM05"
+        },
+        {
+          "detections": 9,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 0,
+          "motor_false_blobs": 0,
+          "false_blob_pixels": [],
+          "motor_patch_max_after_blur": 98,
+          "led_patch_peaks_after_blur": [
+            183,
+            182,
+            178,
+            195,
+            193,
+            192,
+            180,
+            182,
+            178
+          ],
+          "matched_errors_px": [
+            1.6536363143193995,
+            1.60682638482625,
+            1.8097748973372774,
+            1.5010504992848004,
+            1.4617946263201238,
+            1.5849998553284892,
+            1.2313828916300404,
+            0.622575304661954,
+            1.4771565666970967
+          ],
+          "frame": 38,
+          "camera": "CAM06"
+        },
+        {
+          "detections": 11,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 2,
+          "motor_false_blobs": 0,
+          "false_blob_pixels": [
+            [
+              64,
+              687
+            ],
+            [
+              75,
+              696
+            ]
+          ],
+          "motor_patch_max_after_blur": 100,
+          "led_patch_peaks_after_blur": [
+            192,
+            186,
+            186,
+            189,
+            200,
+            192,
+            176,
+            170,
+            176
+          ],
+          "matched_errors_px": [
+            1.6349867127702422,
+            1.6207000112299332,
+            1.4367472650723385,
+            1.3023693976477435,
+            1.3968265789541854,
+            1.046142249740814,
+            1.989183622448244,
+            1.456022312959379,
+            1.529093176337172
+          ],
+          "frame": 300,
+          "camera": "CAM01"
+        },
+        {
+          "detections": 9,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 0,
+          "motor_false_blobs": 0,
+          "false_blob_pixels": [],
+          "motor_patch_max_after_blur": 116,
+          "led_patch_peaks_after_blur": [
+            187,
+            184,
+            187,
+            182,
+            194,
+            193,
+            189,
+            187,
+            187
+          ],
+          "matched_errors_px": [
+            1.6376632430937768,
+            1.233554067939086,
+            1.3171042780924935,
+            2.5401804025681463,
+            1.4147025846026218,
+            1.6721203952288555,
+            1.7114039081795762,
+            1.5077912169106695,
+            1.7767903632594317
+          ],
+          "frame": 300,
+          "camera": "CAM02"
+        },
+        {
+          "detections": 9,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 0,
+          "motor_false_blobs": 0,
+          "false_blob_pixels": [],
+          "motor_patch_max_after_blur": 115,
+          "led_patch_peaks_after_blur": [
+            189,
+            186,
+            188,
+            154,
+            193,
+            188,
+            198,
+            191,
+            194
+          ],
+          "matched_errors_px": [
+            1.9972272432147564,
+            1.405799337338312,
+            1.1049682684988693,
+            1.4059655046437078,
+            1.3551746256724164,
+            1.8308512373162888,
+            1.6340006619347682,
+            1.2293691056205787,
+            1.15358884987211
+          ],
+          "frame": 300,
+          "camera": "CAM03"
+        },
+        {
+          "detections": 9,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 0,
+          "motor_false_blobs": 0,
+          "false_blob_pixels": [],
+          "motor_patch_max_after_blur": 96,
+          "led_patch_peaks_after_blur": [
+            186,
+            187,
+            179,
+            185,
+            188,
+            188,
+            187,
+            186,
+            191
+          ],
+          "matched_errors_px": [
+            1.434306251837287,
+            1.4575639832379357,
+            1.0983397071936125,
+            1.2283078770778226,
+            1.7704559806964686,
+            1.6495452109271014,
+            0.43706910522677533,
+            0.9531545395994634,
+            0.8710196282528978
+          ],
+          "frame": 300,
+          "camera": "CAM04"
+        },
+        {
+          "detections": 9,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 0,
+          "motor_false_blobs": 0,
+          "false_blob_pixels": [],
+          "motor_patch_max_after_blur": 105,
+          "led_patch_peaks_after_blur": [
+            185,
+            178,
+            184,
+            196,
+            193,
+            194,
+            182,
+            179,
+            182
+          ],
+          "matched_errors_px": [
+            1.5823589535194964,
+            1.7848471267082267,
+            0.8669546348637223,
+            1.6567602578582765,
+            1.7520606370406548,
+            1.2484008695115885,
+            1.2674247507569276,
+            1.6092262182016221,
+            1.4100320747889568
+          ],
+          "frame": 300,
+          "camera": "CAM05"
+        },
+        {
+          "detections": 9,
+          "projected_markers": 9,
+          "matched_markers": 9,
+          "false_blobs": 0,
+          "motor_false_blobs": 0,
+          "false_blob_pixels": [],
+          "motor_patch_max_after_blur": 105,
+          "led_patch_peaks_after_blur": [
+            182,
+            186,
+            185,
+            201,
+            205,
+            204,
+            177,
+            168,
+            178
+          ],
+          "matched_errors_px": [
+            1.9242179503817909,
+            1.5339862447230643,
+            1.8061780502420857,
+            1.103439550287264,
+            1.1187625704824764,
+            0.42711784286301535,
+            1.6644394353319931,
+            1.2720048002928588,
+            1.7963398373102495
+          ],
+          "frame": 300,
+          "camera": "CAM06"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "position_reference": "body_origin",
+  "kalman_state": [
+    "px",
+    "py",
+    "pz",
+    "vx",
+    "vy",
+    "vz",
+    "ax",
+    "ay",
+    "az"
+  ],
+  "camera_count": 6,
+  "captures": 549,
+  "first_t": 0.03333333333333333,
+  "last_t": 18.3,
+  "body_observations": {
+    "0": 543,
+    "1": 549,
+    "2": 532
+  },
+  "temporal_prior_fixes": [
+    {
+      "t": 4.233333333333333,
+      "body_id": 2
+    },
+    {
+      "t": 7.666666666666667,
+      "body_id": 2
+    },
+    {
+      "t": 12.733333333333333,
+      "body_id": 2
+    },
+    {
+      "t": 16.166666666666668,
+      "body_id": 2
+    },
+    {
+      "t": 18.2,
+      "body_id": 0
+    }
+  ],
+  "mjpeg_bytes": 149071710,
+  "checks": "raw pos equals fitted origin; finite p/v/a; temporal prior observed over the live API"
+}

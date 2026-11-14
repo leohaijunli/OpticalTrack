@@ -1,0 +1,28 @@
+# ---- heavyweight / regenerable build & runtime artifacts ----
+vendor/
+.venv/
+**/node_modules/
+**/dist/
+
+# rendered frames are huge (2000 MB of PNG) and fully reproducible from
+# blender/mocap_scene.py + out/rig3/*.json — do not track them
+out/frames/
+out/thumbs/
+
+# python bytecode
+__pycache__/
+*.py[cod]
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# scratch debug scripts and ad-hoc test binaries
+tmp_*.py
+_detvid.b64
+*.partial.mp4# rust build output
+rust/mocap-sim/target/
+# transient scene / logs
+out/scene.blend*
+out/render_full.log
+out/render_*.log

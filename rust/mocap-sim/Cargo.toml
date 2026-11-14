@@ -1,0 +1,16 @@
+[package]
+name = "mocap-sim"
+version = "0.1.0"
+edition = "2021"
+description = "MAVLink-driven optical motion capture simulation: telemetry ingest, camera rig, marker ground truth"
+
+[dependencies]
+serde_json = "1.0"
+
+[[bin]]
+name = "mocap-sim"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 2
+panic = "abort"

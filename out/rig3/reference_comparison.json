@@ -1,0 +1,150 @@
+{
+  "comparison_reference": "same body-frame origin in ENU metres",
+  "baseline_conversion": "filtered midpoint minus measured R times base_mid_local",
+  "selection": "all common valid frames; missing estimates are not filled",
+  "baseline": "C:\\Users\\leeli\\Downloads\\opticaltrack\\out\\rig3\\baseline_midpoint\\tracking_from_video.json",
+  "current": "C:\\Users\\leeli\\Downloads\\opticaltrack\\out\\rig3\\tracking_from_video.json",
+  "bodies": {
+    "0": {
+      "name": "T650-A",
+      "common_frames": 590,
+      "baseline_available": 590,
+      "current_available": 590,
+      "before_origin_error": {
+        "count": 590,
+        "mean_mm": 4.517810605952884,
+        "p90_mm": 4.61503445418871,
+        "max_mm": 89.65389732762536,
+        "rmse_mm": 8.202578741614905
+      },
+      "after_origin_error": {
+        "count": 590,
+        "mean_mm": 3.511072014037178,
+        "p90_mm": 4.08087420159649,
+        "max_mm": 13.110244023433182,
+        "rmse_mm": 3.610795734332766
+      },
+      "transition_frames": [
+        {
+          "frame": 3,
+          "before_origin_err_mm": 3.5865060162986864,
+          "after_origin_err_mm": 3.715929796270195
+        },
+        {
+          "frame": 5,
+          "before_origin_err_mm": 89.65389732762536,
+          "after_origin_err_mm": 2.427261657768758
+        },
+        {
+          "frame": 555,
+          "before_origin_err_mm": 8.906293278255243,
+          "after_origin_err_mm": 3.716105747554537
+        },
+        {
+          "frame": 560,
+          "before_origin_err_mm": 88.33902097704501,
+          "after_origin_err_mm": 9.634749698998586
+        },
+        {
+          "frame": 596,
+          "before_origin_err_mm": 87.67836218395682,
+          "after_origin_err_mm": 2.4866828017042684
+        }
+      ]
+    },
+    "1": {
+      "name": "T650-B",
+      "common_frames": 600,
+      "baseline_available": 600,
+      "current_available": 600,
+      "before_origin_error": {
+        "count": 600,
+        "mean_mm": 3.9282784645947415,
+        "p90_mm": 5.177977260933986,
+        "max_mm": 53.477335822653664,
+        "rmse_mm": 5.079880162195535
+      },
+      "after_origin_error": {
+        "count": 600,
+        "mean_mm": 3.370545412888107,
+        "p90_mm": 4.405110114889197,
+        "max_mm": 8.709397002726819,
+        "rmse_mm": 3.4776236735539716
+      },
+      "transition_frames": [
+        {
+          "frame": 3,
+          "before_origin_err_mm": 5.73191496072979,
+          "after_origin_err_mm": 1.9900139658527292
+        },
+        {
+          "frame": 5,
+          "before_origin_err_mm": 3.751900547457564,
+          "after_origin_err_mm": 2.885347960939764
+        },
+        {
+          "frame": 555,
+          "before_origin_err_mm": 53.477335822653664,
+          "after_origin_err_mm": 4.4682309261618425
+        },
+        {
+          "frame": 560,
+          "before_origin_err_mm": 8.030057983898052,
+          "after_origin_err_mm": 6.480277099901499
+        },
+        {
+          "frame": 596,
+          "before_origin_err_mm": 3.6242685877276335,
+          "after_origin_err_mm": 3.036120192116043
+        }
+      ]
+    },
+    "2": {
+      "name": "T650-C",
+      "common_frames": 579,
+      "baseline_available": 579,
+      "current_available": 579,
+      "before_origin_error": {
+        "count": 579,
+        "mean_mm": 4.656450716630894,
+        "p90_mm": 5.647859733187573,
+        "max_mm": 32.57204703277227,
+        "rmse_mm": 5.348660681721893
+      },
+      "after_origin_error": {
+        "count": 579,
+        "mean_mm": 4.301389509193948,
+        "p90_mm": 4.894066664568817,
+        "max_mm": 17.005012557722157,
+        "rmse_mm": 4.570671111785396
+      },
+      "transition_frames": [
+        {
+          "frame": 3,
+          "before_origin_err_mm": 24.74004184177589,
+          "after_origin_err_mm": 4.42605631103088
+        },
+        {
+          "frame": 5,
+          "before_origin_err_mm": 10.94244967074508,
+          "after_origin_err_mm": 4.078869334748815
+        },
+        {
+          "frame": 555,
+          "before_origin_err_mm": 32.57204703277227,
+          "after_origin_err_mm": 4.8628509015639025
+        },
+        {
+          "frame": 560,
+          "before_origin_err_mm": 7.6417129148583545,
+          "after_origin_err_mm": 4.774885862727695
+        },
+        {
+          "frame": 596,
+          "before_origin_err_mm": 3.1893267522437676,
+          "after_origin_err_mm": 4.0259146290077155
+        }
+      ]
+    }
+  }
+}

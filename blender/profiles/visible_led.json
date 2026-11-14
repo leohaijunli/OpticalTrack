@@ -1,0 +1,14 @@
+{
+  "name": "visible-led-matte-airframe-v1",
+  "marker_type": "active visible LED with diffuse spherical cover",
+  "description": "Visible-light capture with matte coated motors and carbon props. Status indicators use a separate low-output material. Radiance values are relative scene units, not calibrated candela.",
+  "materials": {
+    "drone_frame": {"base": [0.055, 0.057, 0.063], "roughness": 0.88, "metallic": 0.0, "specular": 0.15},
+    "drone_motor": {"base": [0.060, 0.062, 0.068], "roughness": 0.90, "metallic": 0.0, "specular": 0.18},
+    "drone_prop": {"base": [0.075, 0.080, 0.090], "roughness": 0.90, "metallic": 0.0, "specular": 0.15},
+    "drone_battery": {"base": [0.100, 0.105, 0.120], "roughness": 0.88, "metallic": 0.0, "specular": 0.15},
+    "drone_status": {"base": [0.120, 0.012, 0.009], "roughness": 0.85, "metallic": 0.0, "specular": 0.15, "emission": [1.0, 0.06, 0.02], "emission_strength": 0.04},
+    "led_marker": {"base": [0.88, 0.88, 0.88], "roughness": 0.75, "metallic": 0.0, "specular": 0.15, "emission": [1.0, 1.0, 1.0], "emission_strength": 8.0}
+  },
+  "sensor": {"exposure_stops": 0.0, "cosmetic_glow": false}
+}
