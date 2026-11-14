@@ -5,6 +5,10 @@ MAVLink 驱动的光学动作捕捉仿真：支持单架 Crazyflie 2.1 和三架
 （OV9281）相机画面、2D 检测真值和 3D 位姿真值，可直接作为开源光学定位/跟踪
 算法的参考数据。
 
+> 📘 **数据流与核心算法**：[docs/dataflow_and_algorithms.md](docs/dataflow_and_algorithms.md)
+> 梳理从数据生成到最终计分的完整链路，以及检测、跨相机三角化、刚体定位、
+> 时间关联、Kalman 滤波等各环节算法与关键数值。
+
 ```
 MAVLink 日志 / UDP  ──►  mocap-sim  ──►  scenario.json + rig/*.csv
                               │                    │
