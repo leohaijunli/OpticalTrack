@@ -11,7 +11,10 @@ MAVLink 驱动的光学动作捕捉仿真：支持单架 Crazyflie 2.1 和三架
 >
 > 🖧 **分布式边缘检测架构**：[docs/edge_architecture.md](docs/edge_architecture.md)
 > 六路完整 600 帧切分等价验证、60 Hz 处理预算、单网线双流与曝光同步。
-> 当前 i7-1255U 中心融合平均 105.70 ms/组，尚不满足 60 Hz；详见实测与优化优先级。
+> 中心纯点输入已从 111.14 ms/组优化到平均 14.86 ms，P99 23.77 ms；稳定 60 Hz 尚需验证。
+>
+> **最新结果**：[中心融合优化](docs/fusion_optimization.md) · [优化版定位误差分布](docs/position_accuracy_optimized.md)
+> 六路视频完整重跑后，三机位置均值 3.51/3.37/4.30 mm，滤波位置与优化前逐帧相同。
 
 ```
 MAVLink 日志 / UDP  ──►  mocap-sim  ──►  scenario.json + rig/*.csv
@@ -73,6 +76,14 @@ MAVLink 日志 / UDP  ──►  mocap-sim  ──►  scenario.json + rig/*.csv
 `adapters/low_cost_mocap/run_tracking.py` 可接视频、图片序列、RTSP/MJPEG 或 USB 设备；
 真实相机需要自己的内外参及硬件同步，通用 OpenCV 到达时间不等于曝光时间。
 应用启动与真实源配置见 [适配器说明](adapters/low_cost_mocap/README.md)。
+
+最新优化版的完整视频重跑、分布图与分位数复现命令见
+[定位误差报告](docs/position_accuracy_optimized.md)。全部 Python 回归测试：
+
+```bat
+.venv\Scripts\python.exe -m pip install matplotlib
+.venv\Scripts\python.exe -m unittest discover -s tests
+```
 
 ### 原单机数据集
 

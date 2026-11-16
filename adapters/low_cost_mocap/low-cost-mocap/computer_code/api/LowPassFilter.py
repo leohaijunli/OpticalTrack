@@ -18,7 +18,9 @@ class LowPassFilter:
         data = np.asarray(data, dtype=float).reshape(self.dims)
         self.buffered_data = np.vstack((self.buffered_data, data[np.newaxis]))
 
-        filtered_data = np.apply_along_axis(lambda x: lfilter(self.b, self.a, x), axis=0, arr=self.buffered_data)
+        # One independent filter per column, with the same history/reset rule.
+        # Avoid apply_along_axis's Python callback and repeated setup per axis.
+        filtered_data = lfilter(self.b, self.a, self.buffered_data, axis=0)
     
         if self.buffered_data.shape[0] >= self.buffer_size:
             self.buffered_data = self.buffered_data[-self.buffer_size//2:]  # Keep the last half of the buffered data for the next filtering iteration

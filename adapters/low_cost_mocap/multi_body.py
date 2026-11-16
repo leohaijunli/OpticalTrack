@@ -47,6 +47,7 @@ import itertools
 import json
 import os
 
+import cv2 as cv
 import numpy as np
 from scipy.spatial.transform import Rotation
 
@@ -191,8 +192,10 @@ def rigid_pose(local, world):
         raise ValueError("rigid_pose needs at least three correspondences")
     lc, wc = local.mean(axis=0), world.mean(axis=0)
     cov = (local - lc).T @ (world - wc)
-    u, _, vt = np.linalg.svd(cov)
-    sign = 1.0 if np.linalg.det(vt.T @ u.T) >= 0 else -1.0
+    # The matrix is always 3x3. OpenCV avoids general NumPy/LAPACK dispatch
+    # overhead while solving the same double-precision Kabsch SVD.
+    _, u, vt = cv.SVDecomp(cov)
+    sign = 1.0 if cv.determinant(vt.T @ u.T) >= 0 else -1.0
     rotation = vt.T @ np.diag([1.0, 1.0, sign]) @ u.T
     translation = wc - rotation @ lc
     residual = world - (rotation @ local.T).T - translation
@@ -230,7 +233,7 @@ def _rigid_assignment(points, tpl, apex_i, base_order, blocked, extra_tol):
     apex, (b0, b1) = tpl["apex"], tpl["base_pair"]
     local3 = tpl["locals"][[apex, b0, b1]]
     world3 = points[[apex_i, base_order[0], base_order[1]]]
-    rotation, translation, _ = rigid_pose(local3, world3)
+    rotation, translation, rmse = rigid_pose(local3, world3)
 
     used = {int(apex_i), int(base_order[0]), int(base_order[1])}
     local_idx = [apex, b0, b1]
@@ -238,28 +241,24 @@ def _rigid_assignment(points, tpl, apex_i, base_order, blocked, extra_tol):
     extra_distance = []
     for marker in tpl.get("extras", ()):
         predicted = rotation @ tpl["locals"][marker] + translation
-        best = None
-        for index in range(len(points)):
-            if index in blocked or index in used:
-                continue
-            distance = float(np.linalg.norm(points[index] - predicted))
-            if distance <= extra_tol and (best is None or distance < best[0]):
-                best = (distance, index)
-        if best is not None:
-            used.add(best[1])
+        distances = np.linalg.norm(points - predicted, axis=1)
+        distances[list(used.union(blocked))] = np.inf
+        best = int(np.argmin(distances))
+        if distances[best] <= extra_tol:
+            used.add(best)
             local_idx.append(marker)
-            world_idx.append(best[1])
-            extra_distance.append(best[0])
+            world_idx.append(best)
+            extra_distance.append(float(distances[best]))
 
-    rotation, translation, rmse = rigid_pose(tpl["locals"][local_idx],
-                                             points[world_idx])
+    if extra_distance:
+        rotation, translation, rmse = rigid_pose(tpl["locals"][local_idx], points[world_idx])
     ids = [tpl["marker_ids"][i] for i in local_idx]
     mode = "rigid" if extra_distance else "triangle3"
-    fields = _pose_fields(rotation, translation, rmse, tpl["body_id"], ids,
-                          mode, extra_tol)
-    fields["extra_residuals_m"] = [float(v) for v in extra_distance]
-    fields["_used_points"] = tuple(world_idx)
-    return fields
+    # Euler conversion and JSON-facing fields are needed only for the winning
+    # branch. Keep numeric evidence here while the two base orders compete.
+    return {"pose_r": rotation, "pose_t": translation, "pose_rmse_m": rmse,
+            "pose_mode": mode, "marker_ids": ids,
+            "extra_residuals_m": extra_distance, "_used_points": tuple(world_idx)}
 
 
 def _assign_geometry(points, tpl, apex_i, base, blocked, extra_tol,
@@ -285,8 +284,9 @@ def _assign_geometry(points, tpl, apex_i, base, blocked, extra_tol,
     # base-midpoint/undirected-heading measurement is unchanged by this choice.
     first_key = (len(first["_used_points"]), -first["pose_rmse_m"])
     second_key = (len(second["_used_points"]), -second["pose_rmse_m"])
-    if (first["pose_mode"] == "triangle3" and second["pose_mode"] == "triangle3"
-            and rotation_prior is not None):
+    use_prior = (first["pose_mode"] == "triangle3" and second["pose_mode"] == "triangle3"
+                 and rotation_prior is not None)
+    if use_prior:
         # An isosceles reference triangle is invariant under the 180 deg
         # rotation that swaps its base markers, so three points cannot say
         # which order is the physical one.  The two branches differ by that
@@ -298,12 +298,16 @@ def _assign_geometry(points, tpl, apex_i, base, blocked, extra_tol,
         first_r = np.asarray(first["pose_r"], dtype=float)
         second_r = np.asarray(second["pose_r"], dtype=float)
         selected = (second if _rotation_distance(second_r, rotation_prior) <
-                    _rotation_distance(first_r, rotation_prior) else first)
-        selected["pose_disambiguation"] = "temporal_prior"
-        return selected
-    if second_key > first_key:
-        return second
-    return first
+                     _rotation_distance(first_r, rotation_prior) else first)
+    else:
+        selected = second if second_key > first_key else first
+    fields = _pose_fields(selected["pose_r"], selected["pose_t"], selected["pose_rmse_m"],
+                          tpl["body_id"], selected["marker_ids"], selected["pose_mode"], extra_tol)
+    fields["extra_residuals_m"] = selected["extra_residuals_m"]
+    fields["_used_points"] = selected["_used_points"]
+    if use_prior:
+        fields["pose_disambiguation"] = "temporal_prior"
+    return fields
 
 
 # ------------------------------------------------------------- the matcher
@@ -317,48 +321,32 @@ def _locate_one(points, errors, distance_matrix, dist1, dist2, tol,
     """
     n = points.shape[0]
     candidates = []
-    for i in range(n):
-        if i in already_matched:
-            continue
-
-        distance_deltas = np.abs(distance_matrix[i] - dist1)
-        matches_index = np.where(distance_deltas < tol)[0]
-        if np.sum(distance_deltas < tol) >= 2:
-            for possible_pair in itertools.product(matches_index, matches_index):
-                if (possible_pair[0] == possible_pair[1]
-                        or i in possible_pair
-                        or any(p in already_matched for p in possible_pair)):
-                    continue
-                pair_distance = float(np.sqrt(
-                    np.sum((points[possible_pair[0]]
-                            - points[possible_pair[1]]) ** 2)))
-
-                # if the pair isnt the correct distance apart
-                if np.abs(pair_distance - dist2) > tol:
-                    continue
-
-                location = (points[possible_pair[0]]
-                            + points[possible_pair[1]]) / 2
-                error = np.mean([errors[i], errors[possible_pair[0]],
-                                 errors[possible_pair[1]]])
-
-                heading_vec = points[possible_pair[0]] - points[possible_pair[1]]
-                heading_vec /= np.linalg.norm(heading_vec)
-                heading = np.arctan2(heading_vec[1], heading_vec[0])
-                heading = heading - np.pi if heading > np.pi / 2 else heading
-                heading = heading + np.pi if heading < -np.pi / 2 else heading
-
-                candidates.append({
-                    "pos": location,
-                    "heading": -heading,
-                    "error": float(error),
-                    "droneIndex": drone_index,
-                    "apex_i": i,
-                    # numpy index scalars break the server's json.dumps; the
-                    # API contract is plain Python numbers end to end.
-                    "base": (int(possible_pair[0]), int(possible_pair[1])),
-                    "_edge_ok": True,
-                })
+    available = np.ones(n, dtype=bool)
+    available[list(already_matched)] = False
+    apex_edges = (np.abs(distance_matrix - dist1) < tol)
+    apex_edges &= available[:, None] & available[None, :]
+    base_edges = np.abs(distance_matrix - dist2) <= tol
+    np.fill_diagonal(apex_edges, False)
+    np.fill_diagonal(base_edges, False)
+    # nonzero traverses C order: apex ascending, then first base, then second
+    # base. This is the same order as the original nested product loop. Chunk
+    # the apex dimension instead of allocating an unbounded N^3 mask.
+    for start in range(0, n, 16):
+        adjacent = apex_edges[start:start + 16]
+        a, b0, b1 = (adjacent[:, :, None] & adjacent[:, None, :] & base_edges[None]).nonzero()
+        a += start
+        positions = (points[b0] + points[b1]) / 2
+        triangle_errors = np.stack((errors[a], errors[b0], errors[b1]), axis=1).mean(axis=1)
+        directions = points[b0] - points[b1]
+        directions /= np.linalg.norm(directions, axis=1)[:, None]
+        headings = np.arctan2(directions[:, 1], directions[:, 0])
+        headings = np.where(headings > np.pi / 2, headings - np.pi, headings)
+        headings = np.where(headings < -np.pi / 2, headings + np.pi, headings)
+        for row in range(len(a)):
+            candidates.append({"pos": positions[row], "heading": -float(headings[row]),
+                               "error": float(triangle_errors[row]), "droneIndex": drone_index,
+                               "apex_i": int(a[row]), "base": (int(b0[row]), int(b1[row])),
+                               "_edge_ok": True})
     # Keep the upstream vertex-ascending / product order (do NOT re-rank by
     # error): re-ranking can flip the base-pair order and turn the heading by
     # pi.  Gates try candidates in this order and stop at the first accept.
@@ -413,11 +401,7 @@ def locate_bodies(object_points, errors, templates, tracker=None,
             tracker.finish_frame(set())
         return []
 
-    distance_matrix = np.zeros((n, n))
-    for i in range(n):
-        for j in range(n):
-            distance_matrix[i, j] = np.sqrt(
-                np.sum((points[i] - points[j]) ** 2))
+    distance_matrix = np.sqrt(np.sum((points[:, None] - points[None, :]) ** 2, axis=2))
 
     already_matched: list[int] = []
     objects = []

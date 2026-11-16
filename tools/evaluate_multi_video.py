@@ -308,12 +308,13 @@ def main():
                 "provenance": provenance,
                 "truth_source": {"trajectory": os.path.abspath(args.trajectory),
                                  "sha256": sha256(args.trajectory)},
-                "algorithm_sha256": {path.replace(os.sep, "/"): sha256(os.path.join(ROOT, path)) for path in (
-                    "adapters/low_cost_mocap/multi_body.py", "adapters/low_cost_mocap/tracking_pipeline.py",
+                 "algorithm_sha256": {path.replace(os.sep, "/"): sha256(os.path.join(ROOT, path)) for path in (
+                    "adapters/low_cost_mocap/multi_body.py", "adapters/low_cost_mocap/multi_view.py",
+                    "adapters/low_cost_mocap/tracking_pipeline.py",
                     "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/helpers.py",
                     "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/KalmanFilter.py",
                     "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/LowPassFilter.py")},
-               "algorithm": ("Low-Cost-Mocap 5px epipolar search + DLT + multi-template "
+               "algorithm": ("Low-Cost-Mocap ordered 5px epipolar search + cached/batched DLT + multi-template "
                              "apex/base search + extra-marker Kabsch pose + repository Kalman statePre"),
                "detection": {"threshold": args.threshold, "blur_size": args.blur_size,
                              "min_area": 3, "max_area": 200, "integer_centroids": True},

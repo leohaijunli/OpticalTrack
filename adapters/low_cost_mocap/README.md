@@ -153,10 +153,13 @@ Python `TrackingPipeline` 也显式接收这三个参数；`locate_bodies` 的�
 
 ## 限制
 
-- **60 fps 部署状态**：本机 i7-1255U 全 600 帧计时，集中式解码+计算均值
-  219.57 ms/组；即使边缘完成检测，中心融合仍平均 105.70 ms/组，P95 178.93 ms。
-  当前实现不满足 60 Hz，也未在本机达到实时 30 Hz。精度报告中的 30 fps 是采样时间轴。
-  详细预算、硬件与网络方案见 [部署评估](../../docs/edge_architecture.md)。
+- **60 fps 部署状态**：本机 i7-1255U 中心纯点输入已优化到平均 14.86 ms/组
+  （3×600 帧），P95 19.97 ms、P99 23.77 ms。平均计算吞吐提升，但尚不能承诺稳定 60 Hz；
+  Web 集中式链路还包含解码、检测和 MJPEG。详见 [中心优化](../../docs/fusion_optimization.md)
+  与 [部署评估](../../docs/edge_architecture.md)。
+- **优化后精度**：完整视频重新定位的误差直方图、CDF 和 XYZ 分量见
+  [误差分布报告](../../docs/position_accuracy_optimized.md)，输出为 `tracking_optimized.*` 与
+  `accuracy_optimized.*`。滤波位置逐帧与原基线相同；精度报告中的 30 fps 是采样时间轴。
 - **独立采集调度**：当前 Web 应用由 `/api/camera-stream` 请求驱动采集/融合；生产部署
   需要独立生产者和有界队列，监控只消费结果。`MOCAP_SOURCE_FPS=60` 不会配置相机传感器
   为 60 fps，已有 30 fps 文件也不会变成原生 60 fps 数据。

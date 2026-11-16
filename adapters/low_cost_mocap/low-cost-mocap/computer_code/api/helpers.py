@@ -645,6 +645,14 @@ def triangulate_points(image_points, camera_poses):
 
 
 def find_point_correspondance_and_object_points(image_points, camera_poses, frames=None):
+    from multi_view import fuse_points
+    intrinsics = [_intrinsic_for_pose(pose, i) for i, pose in enumerate(camera_poses)]
+    return fuse_points(image_points, camera_poses, intrinsics,
+                       _fundamental_from_projections, frames=frames, drawlines=drawlines)
+
+
+def find_point_correspondance_and_object_points_reference(image_points, camera_poses, frames=None):
+    """Pre-optimization implementation retained as a regression/benchmark oracle."""
     # Keep upstream's 5 px epipolar candidates and min-reprojection DLT choice.
     # Missing/invalid observations are bookkeeping, not a new tracking gate.
     image_points = [[list(p) for p in points if _valid_image_point(p)]

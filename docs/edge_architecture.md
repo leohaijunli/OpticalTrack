@@ -5,7 +5,8 @@
 
 ## 1. 结论与实现现状
 
-**每相机就地检测、中心统一融合的切分合理；当前实现实测不满足 60 Hz，仍需完成真机链路。**
+**每相机就地检测、中心统一融合的切分合理。中心已加速约 7.48 倍，但尾延迟仍不满足
+稳定 60 Hz 的预算，真机链路也尚需完成。**
 传感器和千兆带宽具备条件，决定能否落地的是中心计算吞吐、曝光同步、驱动支持及独立采集调度。
 
 | 环节 | 已有证据 / 当前实现 | 部署判断 |
@@ -17,7 +18,7 @@
 | 中心收包 | 验证工具只有离线严格组帧函数 | 实时 deadline、乱序/丢包/重启处理尚未实现 |
 | 当前 Web 应用 | 浏览器 MJPEG 请求推动采集、处理和发布，共享 `_capture_lock` | 需要改为独立生产者；关闭/阻塞监控不能影响定位 |
 | 曝光时间 | 文件用帧号；通用 RTSP/USB 路径用 host-arrival 时间 | 当前真流时间戳不满足同步动捕要求 |
-| 60 Hz 定位 | i7-1255U 中心融合均值 105.70 ms/组，P95 178.93 ms | 远超 16.67 ms 预算，边缘化本身不能解决 |
+| 60 Hz 定位 | i7-1255U 优化后纯点输入均值 14.86 ms/组、P95 19.97 ms、P99 23.77 ms（3×600 组） | 平均速率提升；仍有 19.39% 超过 16.67 ms，不能承诺稳定 60 Hz |
 
 主要代码证据：
 
@@ -101,12 +102,13 @@ CAM06 OV9281 ──短 CSI── Edge06 ──1 GbE──┘                   �
 点流单向发送，不应把网络往返 RTT 当作必经延迟。输出需同时带采样时间、发布时间与数据年龄；
 当前 `statePre` 是采样时刻的先验估计，不是自动预测到网络接收时刻的状态。
 
-当前服务时间实测保存在 `out/rig3/edge_equivalence.json` 的 `timing` 字段。
-中央测量在六个本地检测进程退出后进行，使用原有 OpenCV 线程设置；不包含浏览器绘图、JPEG、
-真实传感器、网络和监控编码。`edge_worker_timing_contention_not_hardware_benchmark` 是同台 PC
-上争用资源的模拟节点计时，不能拿来承诺树莓派性能。
+优化后中心纯点输入实测保存在 `out/rig3/fusion_optimized.json`。
+`out/rig3/edge_equivalence_optimized.json` 另测独立解码/检测进程与中心的分割；中心测量在
+检测进程退出后进行，使用原有 OpenCV 线程设置，不包含浏览器绘图、JPEG、真实传感器、
+网络和监控编码。`edge_worker_timing_contention_not_hardware_benchmark` 是同台 PC 上
+争用资源的模拟节点计时，不能拿来承诺树莓派性能。
 
-**本次实测（i7-1255U，Windows 11，Python 3.13.5，OpenCV 5.0.0，600 组）：**
+**优化前历史实测（`edge_equivalence.json`，i7-1255U，600 组）：**
 
 | 路径/阶段 | 均值 ms | P95 ms | P99 ms |
 |---|---:|---:|---:|
@@ -117,16 +119,27 @@ CAM06 OV9281 ──短 CSI── Edge06 ──1 GbE──┘                   �
 | 边缘点包 JSON 校验/组帧 | 0.50 | 0.81 | 1.92 |
 | 边缘化后中心融合 | **105.70** | **178.93** | **246.52** |
 
-按服务时间均值倒数估算，当前集中式约 4.55 组/s，边缘化后的中心融合约 9.46 组/s；
-不是实测的网络输出帧率。两者在本机上都不足实时 30 Hz，更不足 60 Hz。
-中心融合均值至少需加速约 **6.34 倍** 才碰到 60 Hz 帧周期，P99 要压缩约 **14.79 倍**
-才进入 16.7 ms。应优先做中心热点优化，不能只增加六个节点就承诺 60 fps。
-现有准确率是完整离线处理后的 30 fps **采样时间轴** 指标，不代表墙钟实时吞吐。
+上述旧实现集中式均值倒数约 4.55 组/s，中心融合约 9.46 组/s，均不足实时 30/60 Hz。
+在此基础上已经实施固定几何缓存、批量 DLT/重投影、刚体筛选向量化和小矩阵/滤波优化。
 
-前 60 帧的 cProfile 显示，`find_point_correspondance_and_object_points` 占融合计时约
+**优化前后纯点输入基准（同机环境、OpenCV 线程数 1，不包含解码/检测）：**
+
+| 版本 | 均值 ms | P95 ms | P99 ms | 回归 |
+|---|---:|---:|---:|---:|
+| 优化前 `fusion_before.json` | 111.14 | 193.91 | 328.34 | 600/600 |
+| 优化后 `fusion_optimized.json` | **14.86** | **19.97** | **23.77** | **1,800/1,800** |
+
+均值倒数约 **67.3 组/s**，加速约 **7.48 倍**；但仍有 19.39% 服务时间超过 16.667 ms。
+当前均值只能说明中心计算具备接近 60 Hz 的能力，不能替代固定节拍、队列、热稳态和端到端
+尾延迟验收。优化后重新解码视频的独立检测/中心等价验证同样通过 600/600 组，其中心融合
+均值/P99 为 16.09/25.64 ms（原有线程设置），说明测试环境/负载对时延有影响。
+实现和完整证据见 [中心融合优化](fusion_optimization.md)。
+精度仍是在 30 fps **采样时间轴**上完整处理的结果，不代表原生 60 fps 精度或网络输出速率。
+
+优化前的前 60 帧 cProfile 显示，`find_point_correspondance_and_object_points` 占融合计时约
 **86.7%**，`locate_bodies` 约 11.4%。这段样本中基础矩阵计算 3,847 次、投影矩阵组装
 21,661 次、候选三角化 3,683 次、重投影打分 3,663 次。应处理重复几何计算、候选批处理和
-Python 对象/数组开销；只缓存基础矩阵一项不足以实现所需的多倍加速。
+Python 对象/数组开销；这些热点已作批量化优化，不应把旧 profile 当成当前版本耗时。
 profile 的累计时间有父子嵌套且含插桩开销，不能与上表相加或当作未插桩吞吐。
 
 ### 3.2 带宽预算
@@ -167,7 +180,7 @@ RAW10 紧凑打包约增加 25%，16-bit 容器则翻倍。60 Hz 的点流数据
 复现：
 
 ```powershell
-.\.venv\Scripts\python.exe tools\edge_equivalence_check.py --frames 0-599 --target-fps 60 --reference out\rig3\tracking_from_video.json
+.\.venv\Scripts\python.exe tools\edge_equivalence_check.py --frames 0-599 --target-fps 60 --reference out\rig3\tracking_optimized.json --out out\rig3\edge_equivalence_optimized.json
 ```
 
 验证流程：
@@ -178,22 +191,26 @@ RAW10 紧凑打包约增加 25%，16-bit 容器则翻倍。60 Hz 的点流数据
    时钟、配置和会话。比较各路解码像素 SHA-256，防止不同画面被视为同一帧。
 4. 集中路径调用真实 `TrackingPipeline.process(images, t)`，边缘路径调用
    `process_detections(points, t)`，比较完整序列化结果及全序列哈希，覆盖 p/v/a、姿态、身份、失锁。
-5. 完整序列再与已有 `tracking_from_video.json` 比较；记录视频、标定、脚本和原结果哈希。
+5. 如指定 `--reference`，与同版 `tracking_optimized.json` 逐位比较。与优化前
+   `tracking_from_video.json` 的比较由 `benchmark_fusion.py` 完成，允许数值舍入差。
 
 `--target-fps 60` 只用于预算和带宽外推，**源时间仍是 frame/30**。
 把 30 fps 文件改成 `frame/60`、复制帧或把播放速度翻倍，都不能验证真实 60 fps 动捕。
 测试也没有验证物理网络、实时收包策略、Pi/ARM 检测差异及实际同步；量产板上的相同点输入
 仍应做回归验证，固定 OpenCV/算法与每相机标定版本。
 
-本次完整结果：**600/600 组像素相同、检测相同、融合结果相同**，且与已有权威视频结果
-600/600 一致。两条路径的完整输出 SHA-256 均为：
+优化后完整结果：**600/600 组像素相同、检测相同、融合结果逐位相同**。
+两条路径的完整输出 SHA-256 均为：
 
 ```text
-1f2ae411471a6caf1d7e8ff24c3ba6625182232929c30bbad3aa8fad85adfd3c
+9e0a6486fe44e6c7ba109a1de2e10ee41bdb850c316056d755799b1e5dd3d68a
 ```
 
 原有位置覆盖率 A/B/C 为 98.33%/100%/96.5%，三机同时有有效输出的帧占 **95%**。
 等价通过包含了同样的失锁，不能解读为 100% 跟踪覆盖。
+优化前历史报告 `edge_equivalence.json` 保留原始输出哈希；新旧版本不是整个 JSON 逐位相同，
+但完整回归中滤波 p/v/a 完全相同，几何位置差仅为浮点舍入。定位分布见
+[优化版误差报告](position_accuracy_optimized.md)。
 
 ### 旧结论勘误
 
@@ -285,11 +302,11 @@ Pi 上相同型号相机的典型情况，不能外推为六块 Pi 的保证。�
 以及加入交替方向的 0.05° 外参旋转误差。每个试验运行完整 600 帧，保持原 30 fps 时间轴，
 使用真实匹配、Kabsch、时间关联与滤波。无真值身份进入估计器，计分最后才读取真值。
 
-结果在 `out/rig3/deployment_sensitivity.json`，同时报告条件误差、覆盖率、最长失锁和最近真值
+优化前的单因素结果保存在 `out/rig3/deployment_sensitivity.json`，同时报告条件误差、覆盖率、最长失锁和最近真值
 机体检查。点级噪声不会模拟阈值失检、光斑粘连或曝光效应；单种子试验不是统计置信区间。
 一帧错位是压力测试，不能据此插值声称 0.1 ms 错位的真实相机性能。
 
-**本次结果（3 机体有效输出合并计分，姿态含有解的四点/三点先验帧）：**
+**优化前扰动试验（3 机体有效输出合并计分，姿态含有解的四点/三点先验帧）：**
 
 | 单因素 | 三机同时有解 | 位置均值 / P95 / 最大 mm | 姿态均值 ° |
 |---|---:|---:|---:|
@@ -320,9 +337,9 @@ Pi 上相同型号相机的典型情况，不能外推为六块 Pi 的保证。�
 
 ## 7. 实现优先级
 
-1. **中心基准与热点**：先达到目标处理时间。固定标定的基础矩阵/投影矩阵应缓存；检查极线
-   候选分支、重复 DLT/SVD、Python 循环。保留点/候选次序并做全序列等价回归，避免用降低精度
-   掩盖速度问题。时间关联有状态，不能直接把连续帧无序分给不同进程。
+1. **中心尾延迟**：几何缓存与批量化已完成，均值降至 14.86 ms。继续降低 P99，检查候选数量
+   增长、CPU 调度与热稳态；每次修改保持全序列回归，避免降低精度来掩盖速度问题。
+   时间关联有状态，不能直接把连续帧无序分给不同进程。
 2. **独立运行链路**：一个采集/组帧生产者，一个按时序融合工作器，HTTP/监控只消费已发布结果。
    把标注、拼图、编码从定位关键路径移出。记录实际服务时间和样本年龄。
 3. **一个实物节点**：锁定模组 SKU/驱动/板型；验证 1280×800@60、短曝光、触发时间戳、
@@ -335,7 +352,9 @@ Pi 上相同型号相机的典型情况，不能外推为六块 Pi 的保证。�
 ## 8. 资料
 
 - 本项目：[数据流与核心算法](dataflow_and_algorithms.md)、
-  `out/rig3/edge_equivalence.json`、`out/rig3/deployment_sensitivity.json`、`out/rig3/accuracy3.json`。
+  [中心融合优化](fusion_optimization.md)、[优化后定位分布](position_accuracy_optimized.md)、
+  `out/rig3/edge_equivalence_optimized.json`、`out/rig3/fusion_optimized.json`。
+  历史基线：`out/rig3/edge_equivalence.json`、`out/rig3/deployment_sensitivity.json`、`out/rig3/accuracy3.json`。
 - [OMNIVISION OV9281：1280×800@120、全局快门、帧同步](https://www.ovt.com/products/ov9281/)。
 - [Raspberry Pi 相机软件：软件编码、高帧率与相位同步](https://www.raspberrypi.com/documentation/accessories/camera-software.html)。
 - [Raspberry Pi 2026 H.264 编码性能白皮书](https://pip-assets.raspberrypi.com/categories/685-app-notes-guides-whitepapers/documents/RP-010033-WP-1-H.264%20encoding%20performance%20on%20Raspberry%20Pi%205_series%20computers.pdf)。
