@@ -65,6 +65,14 @@ class EdgeEquivalenceTests(unittest.TestCase):
         result = assemble_frame(packets[::-1], ["CAM01", "CAM02"], 8, 30, expected)
         self.assertEqual(result, [[[80, 4], [12, 9]], []])
 
+    def test_packet_roundtrip_does_not_quantize_subpixel_coordinates(self):
+        expected, packets = self.packets()
+        packet = json.loads(packets[0])
+        packet["points"] = [[80.25, 4.125], [12.333333333333334, 9.75]]
+        packets[0] = json_bytes(packet)
+        result = assemble_frame(packets[::-1], ["CAM01", "CAM02"], 8, 30, expected)
+        np.testing.assert_array_equal(result[0], packet["points"])
+
     def test_duplicate_missing_or_mismatched_packets_fail(self):
         expected, packets = self.packets()
         for bad in ([packets[0]], [packets[0], packets[0]]):

@@ -5,7 +5,7 @@ import unittest
 import numpy as np
 
 from tools.benchmark_fusion import numeric_differences
-from tools.plot_tracking_distribution import series, summarize
+from tools.plot_tracking_distribution import series, summarize, comparison_configuration
 
 
 class TrackingDistributionTests(unittest.TestCase):
@@ -69,6 +69,16 @@ class TrackingDistributionTests(unittest.TestCase):
                        dict(expected, pos=[1.0, 2.0, 3.01])):
             with self.subTest(actual=actual):
                 self.assertTrue(numeric_differences(actual, expected))
+
+    def test_centroid_comparison_does_not_silently_allow_other_parameter_changes(self):
+        before = {"threshold": 140, "fps": 30}
+        after = dict(before, centroid_mode="subpixel")
+        with self.assertRaises(ValueError):
+            comparison_configuration(after, before)
+        self.assertEqual(comparison_configuration(after, before, True),
+                         {"centroid_mode": {"current": "subpixel", "baseline": "integer"}})
+        with self.assertRaises(ValueError):
+            comparison_configuration(dict(after, threshold=150), before, True)
 
 
 if __name__ == "__main__":

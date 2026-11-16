@@ -60,20 +60,22 @@ def _choices(points, fundamentals, frames, drawlines):
                                + lines[:, None, 1] * current[None, :, 1] + lines[:, None, 2])
             distances /= np.sqrt(lines[:, 0] ** 2 + lines[:, 1] ** 2)[:, None]
         nearest = set()
+        pixel_keys = [tuple(point) for point in current]
         for row, options in enumerate(choices):
             matches = (distances[row] < 5).nonzero()[0]
             if matches.size:
                 # Match the original default argsort, including its tie order.
-                matches = matches[distances[row, matches].argsort()]
+                if matches.size > 1:
+                    matches = matches[distances[row, matches].argsort()]
                 options.append(tuple(int(index) for index in matches))
                 # The original removes all equal-coordinate rows, not just
                 # one index, when deciding which observations become roots.
-                nearest.add(tuple(current[matches[0]]))
+                nearest.add(pixel_keys[matches[0]])
             else:
                 options.append((-1,))
         new_roots = []
-        for index, point in enumerate(current):
-            if tuple(point) not in nearest:
+        for index, key in enumerate(pixel_keys):
+            if key not in nearest:
                 new_roots.append(index)
                 choices.append([(-1,)] * camera + [(index,)])
         source_roots.append((camera, np.asarray(new_roots, dtype=np.intp)))
@@ -130,6 +132,25 @@ def _solve(indices, points, geometry):
     return errors, world
 
 
+def _validated_points(camera):
+    """Validate ordinary N-by-2 observations in one NumPy operation.
+
+    Ragged observations retain the earlier row-wise filtering behavior.
+    None in a regular numeric array becomes NaN and is discarded, not coerced
+    to a zero-valued observation.
+    """
+    try:
+        points = np.asarray(camera, dtype=np.float64)
+    except (TypeError, ValueError):
+        points = None
+    if points is not None and points.ndim == 2 and points.shape[1] == 2:
+        valid = np.isfinite(points).all(axis=1)
+        return points if valid.all() else points[valid]
+    return np.asarray([p for p in camera if len(p) == 2 and
+                       all(x is not None and np.isfinite(x) for x in p)],
+                      dtype=np.float64).reshape(-1, 2)
+
+
 def fuse_points(image_points, camera_poses, intrinsics, fundamental, frames=None,
                 drawlines=None, batch_size=2048):
     if (len(image_points) != len(camera_poses) or len(intrinsics) != len(camera_poses)
@@ -137,9 +158,7 @@ def fuse_points(image_points, camera_poses, intrinsics, fundamental, frames=None
         raise ValueError("one observation list is required per calibrated camera (at least two)")
     if batch_size < 1:
         raise ValueError("batch_size must be positive")
-    points = [np.asarray([p for p in camera if len(p) == 2 and
-                          all(x is not None and np.isfinite(x) for x in p)], dtype=np.float64).reshape(-1, 2)
-              for camera in image_points]
+    points = [_validated_points(camera) for camera in image_points]
     if not any(len(camera) for camera in points):
         return np.empty(0), np.empty((0, 3)), frames
     snapshots = tuple((np.asarray(K, dtype=np.float64).reshape(3, 3).tobytes(),

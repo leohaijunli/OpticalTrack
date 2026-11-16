@@ -11,10 +11,13 @@ MAVLink 驱动的光学动作捕捉仿真：支持单架 Crazyflie 2.1 和三架
 >
 > 🖧 **分布式边缘检测架构**：[docs/edge_architecture.md](docs/edge_architecture.md)
 > 六路完整 600 帧切分等价验证、60 Hz 处理预算、单网线双流与曝光同步。
-> 中心纯点输入已从 111.14 ms/组优化到平均 14.86 ms，P99 23.77 ms；稳定 60 Hz 尚需验证。
+> 第二轮中心纯点输入平均 10.23 ms/组、P99 15.07 ms（3×600 组）；端到端 60 Hz 尚需真机验证。
 >
 > **最新结果**：[中心融合优化](docs/fusion_optimization.md) · [优化版定位误差分布](docs/position_accuracy_optimized.md)
 > 六路视频完整重跑后，三机位置均值 3.51/3.37/4.30 mm，滤波位置与优化前逐帧相同。
+>
+> **进一步优化试验**：[docs/further_optimization.md](docs/further_optimization.md)
+> 可选浮点质心把位置均值降到 1.09/1.43/1.42 mm，但覆盖略降、A 最大误差上升；默认仍为整数模式。
 
 ```
 MAVLink 日志 / UDP  ──►  mocap-sim  ──►  scenario.json + rig/*.csv

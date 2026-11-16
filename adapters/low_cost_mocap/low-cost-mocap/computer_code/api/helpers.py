@@ -86,13 +86,23 @@ def prepare_camera_frame(image, params, visible_mode=True, blur_size=9):
     return image
 
 
-def detect_visible_dots(image, threshold=150, min_area=3, max_area=200):
-    """The adapter's visible-mode detector (integer centroids, like upstream)."""
+def detect_visible_dots(image, threshold=150, min_area=3, max_area=200,
+                        centroid_mode="integer"):
+    """Visible dots; upstream integer mode or unrounded component centroids.
+
+    Subpixel mode preserves the connected-component centroid's floating-point
+    value. It is not a fitted optical spot centre or a truth-derived offset.
+    """
+    if centroid_mode not in ("integer", "subpixel"):
+        raise ValueError("centroid_mode must be integer or subpixel")
     gray = image if image.ndim == 2 else cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     _, mask = cv.threshold(gray, threshold, 255, cv.THRESH_BINARY)
     count, _, stats, centers = cv.connectedComponentsWithStats(mask, 8)
-    return [[int(centers[i, 0]), int(centers[i, 1])] for i in range(1, count)
-            if min_area <= stats[i, cv.CC_STAT_AREA] <= max_area]
+    selected = [i for i in range(1, count)
+                if min_area <= stats[i, cv.CC_STAT_AREA] <= max_area]
+    if centroid_mode == "subpixel":
+        return centers[selected].tolist()
+    return [[int(centers[i, 0]), int(centers[i, 1])] for i in selected]
 
 
 def _intrinsic_for_pose(pose, camera_index):
@@ -435,10 +445,16 @@ class Cameras:
             thresh = float(os.environ.get("MOCAP_DOT_THRESHOLD", 150))
             min_area = float(os.environ.get("MOCAP_DOT_MIN_AREA", 3))
             max_area = float(os.environ.get("MOCAP_DOT_MAX_AREA", 200))
-            image_points = detect_visible_dots(img, thresh, min_area, max_area)
+            image_points = detect_visible_dots(
+                img, thresh, min_area, max_area,
+                centroid_mode=os.environ.get("MOCAP_CENTROID_MODE", "integer"))
             for cx, cy in image_points:
-                cv.putText(img, f'({cx}, {cy})', (cx, cy - 15), cv.FONT_HERSHEY_SIMPLEX, 0.3, (100,255,100), 1)
-                cv.circle(img, (cx, cy), 1, (100,255,100), -1)
+                # Only drawing rounds the pixel location; the analysis points
+                # stay unrounded all the way to multiview fusion.
+                drawing_point = (int(round(cx)), int(round(cy)))
+                cv.putText(img, f'({cx}, {cy})', (drawing_point[0], drawing_point[1] - 15),
+                           cv.FONT_HERSHEY_SIMPLEX, 0.3, (100,255,100), 1)
+                cv.circle(img, drawing_point, 1, (100,255,100), -1)
         else:
             # Upstream IR detector: threshold the high-pass response.
             thresh = float(os.environ.get("MOCAP_DOT_THRESHOLD", 255 * 0.2))

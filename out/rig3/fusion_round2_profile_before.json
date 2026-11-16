@@ -1,0 +1,309 @@
+{
+  "frame_count": 120,
+  "total_instrumented_s": 2.1624412000000013,
+  "note": "cProfile adds overhead; cumulative entries overlap; use edge_equivalence.json for uninstrumented service time",
+  "top_cumulative": [
+    {
+      "function": "adapters/low_cost_mocap/tracking_pipeline.py:130:process_detections",
+      "calls": 120,
+      "self_s": 0.0048331,
+      "cumulative_s": 2.1584767
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_body.py:356:locate_bodies",
+      "calls": 120,
+      "self_s": 0.0268158,
+      "cumulative_s": 0.9708825000000001
+    },
+    {
+      "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/helpers.py:647:find_point_correspondance_and_object_points",
+      "calls": 120,
+      "self_s": 0.0038751000000000002,
+      "cumulative_s": 0.9404636000000001
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_view.py:133:fuse_points",
+      "calls": 120,
+      "self_s": 0.053405100000000004,
+      "cumulative_s": 0.9317471
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_body.py:264:_assign_geometry",
+      "calls": 352,
+      "self_s": 0.0064361,
+      "cumulative_s": 0.6905852
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_view.py:34:_choices",
+      "calls": 120,
+      "self_s": 0.3395087,
+      "cumulative_s": 0.473687
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_body.py:225:_rigid_assignment",
+      "calls": 704,
+      "self_s": 0.07436140000000001,
+      "cumulative_s": 0.4388152
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_body.py:180:rigid_pose",
+      "calls": 1052,
+      "self_s": 0.1219128,
+      "cumulative_s": 0.33041970000000004
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_body.py:206:_pose_fields",
+      "calls": 352,
+      "self_s": 0.0224693,
+      "cumulative_s": 0.24427000000000001
+    },
+    {
+      "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/KalmanFilter.py:61:predict_location",
+      "calls": 120,
+      "self_s": 0.0670839,
+      "cumulative_s": 0.24229750000000003
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_view.py:93:_solve",
+      "calls": 120,
+      "self_s": 0.08643490000000001,
+      "cumulative_s": 0.2354949
+    },
+    {
+      "function": ".venv/Lib/site-packages/scipy/spatial/transform/_rotation.py:533:from_matrix",
+      "calls": 352,
+      "self_s": 0.044271500000000005,
+      "cumulative_s": 0.18086400000000002
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_body.py:314:_locate_one",
+      "calls": 360,
+      "self_s": 0.0944049,
+      "cumulative_s": 0.15915880000000002
+    },
+    {
+      "function": ".venv/Lib/site-packages/numpy/_core/_methods.py:115:_mean",
+      "calls": 3525,
+      "self_s": 0.048536600000000006,
+      "cumulative_s": 0.11620190000000001
+    },
+    {
+      "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/LowPassFilter.py:15:filter",
+      "calls": 1044,
+      "self_s": 0.0125269,
+      "cumulative_s": 0.10078390000000001
+    },
+    {
+      "function": "~:0:<method 'mean' of 'numpy.ndarray' objects>",
+      "calls": 2473,
+      "self_s": 0.0066852000000000005,
+      "cumulative_s": 0.0921942
+    },
+    {
+      "function": "~:0:<built-in method builtins.all>",
+      "calls": 8527,
+      "self_s": 0.0171801,
+      "cumulative_s": 0.0910175
+    },
+    {
+      "function": ".venv/Lib/site-packages/numpy/linalg/_linalg.py:1666:svd",
+      "calls": 150,
+      "self_s": 0.0747484,
+      "cumulative_s": 0.08138390000000001
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_view.py:141:<genexpr>",
+      "calls": 25581,
+      "self_s": 0.07383740000000001,
+      "cumulative_s": 0.07383740000000001
+    },
+    {
+      "function": "~:0:<method 'reduce' of 'numpy.ufunc' objects>",
+      "calls": 9309,
+      "self_s": 0.0719674,
+      "cumulative_s": 0.0719674
+    },
+    {
+      "function": ".venv/Lib/site-packages/numpy/_core/numeric.py:2320:isclose",
+      "calls": 352,
+      "self_s": 0.0344182,
+      "cumulative_s": 0.0602926
+    },
+    {
+      "function": ".venv/Lib/site-packages/numpy/linalg/_linalg.py:2615:norm",
+      "calls": 2460,
+      "self_s": 0.030942800000000003,
+      "cumulative_s": 0.059209500000000005
+    },
+    {
+      "function": ".venv/Lib/site-packages/scipy/signal/_signaltools.py:2067:lfilter",
+      "calls": 1044,
+      "self_s": 0.01298,
+      "cumulative_s": 0.056255200000000005
+    },
+    {
+      "function": "~:0:<projectPoints>",
+      "calls": 720,
+      "self_s": 0.051922,
+      "cumulative_s": 0.051922
+    },
+    {
+      "function": "~:0:<SVDecomp>",
+      "calls": 1052,
+      "self_s": 0.0434138,
+      "cumulative_s": 0.0434138
+    }
+  ],
+  "top_self": [
+    {
+      "function": "adapters/low_cost_mocap/multi_view.py:34:_choices",
+      "calls": 120,
+      "self_s": 0.3395087,
+      "cumulative_s": 0.473687
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_body.py:180:rigid_pose",
+      "calls": 1052,
+      "self_s": 0.1219128,
+      "cumulative_s": 0.33041970000000004
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_body.py:314:_locate_one",
+      "calls": 360,
+      "self_s": 0.0944049,
+      "cumulative_s": 0.15915880000000002
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_view.py:93:_solve",
+      "calls": 120,
+      "self_s": 0.08643490000000001,
+      "cumulative_s": 0.2354949
+    },
+    {
+      "function": ".venv/Lib/site-packages/numpy/linalg/_linalg.py:1666:svd",
+      "calls": 150,
+      "self_s": 0.0747484,
+      "cumulative_s": 0.08138390000000001
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_body.py:225:_rigid_assignment",
+      "calls": 704,
+      "self_s": 0.07436140000000001,
+      "cumulative_s": 0.4388152
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_view.py:141:<genexpr>",
+      "calls": 25581,
+      "self_s": 0.07383740000000001,
+      "cumulative_s": 0.07383740000000001
+    },
+    {
+      "function": "~:0:<method 'reduce' of 'numpy.ufunc' objects>",
+      "calls": 9309,
+      "self_s": 0.0719674,
+      "cumulative_s": 0.0719674
+    },
+    {
+      "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/KalmanFilter.py:61:predict_location",
+      "calls": 120,
+      "self_s": 0.0670839,
+      "cumulative_s": 0.24229750000000003
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_view.py:133:fuse_points",
+      "calls": 120,
+      "self_s": 0.053405100000000004,
+      "cumulative_s": 0.9317471
+    },
+    {
+      "function": "~:0:<projectPoints>",
+      "calls": 720,
+      "self_s": 0.051922,
+      "cumulative_s": 0.051922
+    },
+    {
+      "function": ".venv/Lib/site-packages/numpy/_core/_methods.py:115:_mean",
+      "calls": 3525,
+      "self_s": 0.048536600000000006,
+      "cumulative_s": 0.11620190000000001
+    },
+    {
+      "function": ".venv/Lib/site-packages/scipy/spatial/transform/_rotation.py:533:from_matrix",
+      "calls": 352,
+      "self_s": 0.044271500000000005,
+      "cumulative_s": 0.18086400000000002
+    },
+    {
+      "function": "~:0:<SVDecomp>",
+      "calls": 1052,
+      "self_s": 0.0434138,
+      "cumulative_s": 0.0434138
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_view.py:68:<genexpr>",
+      "calls": 18255,
+      "self_s": 0.0364806,
+      "cumulative_s": 0.0364806
+    },
+    {
+      "function": ".venv/Lib/site-packages/numpy/_core/numeric.py:2320:isclose",
+      "calls": 352,
+      "self_s": 0.0344182,
+      "cumulative_s": 0.0602926
+    },
+    {
+      "function": "~:0:<built-in method numpy.asarray>",
+      "calls": 14006,
+      "self_s": 0.0343455,
+      "cumulative_s": 0.0343455
+    },
+    {
+      "function": ".venv/Lib/site-packages/numpy/linalg/_linalg.py:2615:norm",
+      "calls": 2460,
+      "self_s": 0.030942800000000003,
+      "cumulative_s": 0.059209500000000005
+    },
+    {
+      "function": ".venv/Lib/site-packages/numpy/_core/_methods.py:73:_count_reduce_items",
+      "calls": 3525,
+      "self_s": 0.028340800000000003,
+      "cumulative_s": 0.032803200000000005
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_body.py:356:locate_bodies",
+      "calls": 120,
+      "self_s": 0.0268158,
+      "cumulative_s": 0.9708825000000001
+    },
+    {
+      "function": "~:0:<method 'nonzero' of 'numpy.ndarray' objects>",
+      "calls": 8362,
+      "self_s": 0.0256493,
+      "cumulative_s": 0.0256493
+    },
+    {
+      "function": "~:0:<method 'argsort' of 'numpy.ndarray' objects>",
+      "calls": 7738,
+      "self_s": 0.0250012,
+      "cumulative_s": 0.0250012
+    },
+    {
+      "function": "adapters/low_cost_mocap/multi_body.py:206:_pose_fields",
+      "calls": 352,
+      "self_s": 0.0224693,
+      "cumulative_s": 0.24427000000000001
+    },
+    {
+      "function": "~:0:<computeCorrespondEpilines>",
+      "calls": 1102,
+      "self_s": 0.019837,
+      "cumulative_s": 0.019837
+    },
+    {
+      "function": ".venv/Lib/site-packages/scipy/spatial/transform/_rotation.py:1226:as_euler",
+      "calls": 352,
+      "self_s": 0.0177437,
+      "cumulative_s": 0.0263746
+    }
+  ]
+}

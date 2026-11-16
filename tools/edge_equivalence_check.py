@@ -90,7 +90,8 @@ def edge_video_packets(job):
             start = time.perf_counter()
             prepared = prepare_camera_frame(image, param, True, config["blur_size"])
             points = detect_visible_dots(prepared, config["threshold"],
-                                         config["min_area"], config["max_area"])
+                                         config["min_area"], config["max_area"],
+                                         config.get("centroid_mode", "integer"))
             detect_ms.append((time.perf_counter() - start) * 1000)
             packets.append(json_bytes({
                 "schema": 1, "session_id": job["session_id"],
@@ -176,6 +177,7 @@ def main():
                         help="service-time/bandwidth target; source timestamps are never changed")
     parser.add_argument("--threshold", type=float, default=140.0)
     parser.add_argument("--blur-size", type=int, default=9)
+    parser.add_argument("--centroid-mode", choices=("integer", "subpixel"), default="integer")
     parser.add_argument("--max-err", type=float, default=6.0)
     parser.add_argument("--h264-mbps", type=float, default=6.0,
                         help="assumed monitor bitrate per camera, independent of point FPS")
@@ -194,15 +196,19 @@ def main():
     calibration_path = os.path.join(args.rig_dir, "cameras_calib.json")
     body_path = os.path.join(args.rig_dir, "rig_blender.json")
     pipeline = TimedPipeline(calibration_path, body_path, threshold=args.threshold,
-                             blur_size=args.blur_size, max_err=args.max_err, fps=args.source_fps)
+                             blur_size=args.blur_size, max_err=args.max_err, fps=args.source_fps,
+                             centroid_mode=args.centroid_mode)
     edge_pipeline = TimedPipeline(calibration_path, body_path, threshold=args.threshold,
-                                  blur_size=args.blur_size, max_err=args.max_err, fps=args.source_fps)
+                                  blur_size=args.blur_size, max_err=args.max_err, fps=args.source_fps,
+                                  centroid_mode=args.centroid_mode)
     paths = [os.path.join(args.video_dir, f"{cam[-2:]}_{cam.lower()}_{args.tag}_20s.mp4")
              for cam in pipeline.camera_names]
     provenance = video_provenance(paths, os.path.join(args.video_dir, f"{args.tag}_manifest.json"),
                                   pipeline.geometry_sha256)
     detector = {key: pipeline.configuration[key] for key in
                 ("threshold", "blur_size", "min_area", "max_area")}
+    if args.centroid_mode != "integer":
+        detector["centroid_mode"] = args.centroid_mode
     detector["helper_sha256"] = sha256(os.path.join(ROOT, "adapters", "low_cost_mocap",
                                                   "low-cost-mocap", "computer_code", "api", "helpers.py"))
     expected = {"session_id": "sim-" + hashlib.sha256(json_bytes(provenance)).hexdigest()[:16],

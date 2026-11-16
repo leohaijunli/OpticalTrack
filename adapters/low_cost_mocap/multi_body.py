@@ -46,6 +46,7 @@ from __future__ import annotations
 import itertools
 import json
 import os
+from functools import lru_cache
 
 import cv2 as cv
 import numpy as np
@@ -177,6 +178,13 @@ def load_body_templates(path: str) -> list[dict]:
 
 
 
+@lru_cache(maxsize=64)
+def _centered_local(snapshot, shape):
+    local = np.frombuffer(snapshot, dtype=np.float64).reshape(shape)
+    center = local.mean(axis=0)
+    return center, local - center
+
+
 def rigid_pose(local, world):
     """Least-squares rigid transform local -> world (proper rotation, no scale).
 
@@ -190,8 +198,11 @@ def rigid_pose(local, world):
         raise ValueError("rigid_pose expects matching (N,3) arrays")
     if len(local) < 3:
         raise ValueError("rigid_pose needs at least three correspondences")
-    lc, wc = local.mean(axis=0), world.mean(axis=0)
-    cov = (local - lc).T @ (world - wc)
+    # The local reference triangle/rig is fixed across captures. Cache by
+    # value so in-place edits of a template cannot retain an old centroid.
+    lc, centered_local = _centered_local(local.tobytes(), local.shape)
+    wc = world.mean(axis=0)
+    cov = centered_local.T @ (world - wc)
     # The matrix is always 3x3. OpenCV avoids general NumPy/LAPACK dispatch
     # overhead while solving the same double-precision Kabsch SVD.
     _, u, vt = cv.SVDecomp(cov)

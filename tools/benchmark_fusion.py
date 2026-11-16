@@ -97,7 +97,8 @@ def main():
 
     def make_pipeline():
         pipeline = TrackingPipeline(os.path.join(args.rig_dir, "cameras_calib.json"),
-                                     os.path.join(args.rig_dir, "rig_blender.json"), fps=cache["summary"]["fps"])
+                                     os.path.join(args.rig_dir, "rig_blender.json"), fps=cache["summary"]["fps"],
+                                     centroid_mode=cache["summary"]["configuration"].get("centroid_mode", "integer"))
         if pipeline.configuration != cache["summary"]["configuration"]:
             raise ValueError("reference and runtime tracking parameters must agree")
         if pipeline.geometry_sha256 != cache["summary"]["geometry_sha256"]:

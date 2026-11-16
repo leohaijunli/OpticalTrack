@@ -119,6 +119,7 @@ Start" 后，"Rig identity & pose" 面板实时显示每架机的锁定状态、
 | `MOCAP_DOT_THRESHOLD` | 140 | 亮度阈值（标记过曝 / 灰地~60） |
 | `MOCAP_DOT_MIN_AREA` | 3 | 标记最小连通域面积（滤地面噪声） |
 | `MOCAP_DOT_MAX_AREA` | 200 | 标记最大连通域面积 |
+| `MOCAP_CENTROID_MODE` | `integer` | `subpixel` 保留浮点连通域质心；可选实验，覆盖/尾部取舍见进一步优化报告 |
 | `MOCAP_AUTOSCALE` | 0 | 已给定米制标定时禁止再次估计尺度 |
 | `MOCAP_VIDEO_DIR` | `out/video` | 视频目录 |
 | `MOCAP_VIDEO_TAG` | `t650`（启动脚本） | 只读取该数据集的六段干净片，不混入单机/HUD |
@@ -153,13 +154,17 @@ Python `TrackingPipeline` 也显式接收这三个参数；`locate_bodies` 的�
 
 ## 限制
 
-- **60 fps 部署状态**：本机 i7-1255U 中心纯点输入已优化到平均 14.86 ms/组
-  （3×600 帧），P95 19.97 ms、P99 23.77 ms。平均计算吞吐提升，但尚不能承诺稳定 60 Hz；
+- **60 fps 部署状态**：本机 i7-1255U 第二轮中心纯点输入平均 10.23 ms/组
+  （3×600 帧），P95 13.74 ms、P99 15.07 ms；仍有 0.33% 超过 16.67 ms。不能据此承诺端到端 60 Hz；
   Web 集中式链路还包含解码、检测和 MJPEG。详见 [中心优化](../../docs/fusion_optimization.md)
   与 [部署评估](../../docs/edge_architecture.md)。
 - **优化后精度**：完整视频重新定位的误差直方图、CDF 和 XYZ 分量见
   [误差分布报告](../../docs/position_accuracy_optimized.md)，输出为 `tracking_optimized.*` 与
   `accuracy_optimized.*`。滤波位置逐帧与原基线相同；精度报告中的 30 fps 是采样时间轴。
+- **浮点质心模式**：独立入口可加 `--centroid-mode subpixel`，应用启动前设置
+  `MOCAP_CENTROID_MODE=subpixel`。显示标注取整不影响传入融合的浮点坐标；
+  `/api/tracking-config` 上报所选模式。其均值更小但存在覆盖与尖峰取舍，默认保持整数，
+  详见 [进一步优化](../../docs/further_optimization.md)。不要在连续跟踪中途直接切换模式。
 - **独立采集调度**：当前 Web 应用由 `/api/camera-stream` 请求驱动采集/融合；生产部署
   需要独立生产者和有界队列，监控只消费结果。`MOCAP_SOURCE_FPS=60` 不会配置相机传感器
   为 60 fps，已有 30 fps 文件也不会变成原生 60 fps 数据。

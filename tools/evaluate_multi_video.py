@@ -159,6 +159,7 @@ def main():
     parser.add_argument("--frames", default="0-599")
     parser.add_argument("--threshold", type=float, default=140)
     parser.add_argument("--blur-size", type=int, default=9)
+    parser.add_argument("--centroid-mode", choices=("integer", "subpixel"), default="integer")
     parser.add_argument("--tol", type=float, default=0.025)
     parser.add_argument("--fps", type=float, default=30)
     parser.add_argument("--gate-m", type=float, default=0.5,
@@ -189,7 +190,7 @@ def main():
                                 tolerance=args.tol, fps=args.fps,
                                 gate_m=args.gate_m, max_err=args.max_err,
                                 extra_tol=args.extra_tol, position_reference=args.position_reference,
-                                max_speed=args.max_speed)
+                                max_speed=args.max_speed, centroid_mode=args.centroid_mode)
     truth_poses = trajectory_poses(args.trajectory)
     offsets = {t["body_id"]: (t["base_mid_local"] if args.position_reference == "base_midpoint"
                               else np.zeros(3)) for t in pipeline.templates}
@@ -316,8 +317,10 @@ def main():
                     "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/LowPassFilter.py")},
                "algorithm": ("Low-Cost-Mocap ordered 5px epipolar search + cached/batched DLT + multi-template "
                              "apex/base search + extra-marker Kabsch pose + repository Kalman statePre"),
-               "detection": {"threshold": args.threshold, "blur_size": args.blur_size,
-                             "min_area": 3, "max_area": 200, "integer_centroids": True},
+                "detection": {"threshold": args.threshold, "blur_size": args.blur_size,
+                              "min_area": 3, "max_area": 200,
+                              "centroid_mode": args.centroid_mode,
+                              "integer_centroids": args.centroid_mode == "integer"},
                "match_tolerance_m": args.tol,
                "extra_marker_tolerance_m": args.extra_tol,
                 "position_reference_key": args.position_reference,

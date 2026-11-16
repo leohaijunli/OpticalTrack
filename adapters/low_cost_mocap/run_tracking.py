@@ -40,11 +40,12 @@ def main():
                         help="reference-triangle mean reprojection MSE limit (px^2)")
     parser.add_argument("--position-reference", choices=POSITION_REFERENCES, default="body_origin")
     parser.add_argument("--max-speed", type=float, default=10.0, help="velocity measurement magnitude limit (m/s)")
+    parser.add_argument("--centroid-mode", choices=("integer", "subpixel"), default="integer")
     args = parser.parse_args()
     pipeline = TrackingPipeline(args.calibration, args.body_specs,
                                 gate_m=args.gate_m, extra_tol=args.extra_tol,
                                 max_err=args.max_err, position_reference=args.position_reference,
-                                max_speed=args.max_speed)
+                                max_speed=args.max_speed, centroid_mode=args.centroid_mode)
     sources = args.sources or ",".join(discover_clips(tag=args.video_tag))
     source = VideoReplay(source=sources, realtime=False if args.unpaced else None, loop=False)
     if len(source) != len(pipeline.camera_names):

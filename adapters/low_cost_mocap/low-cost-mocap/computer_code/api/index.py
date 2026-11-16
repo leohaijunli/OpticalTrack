@@ -64,6 +64,7 @@ def tracking_config():
                         "image_size": camera.get("image_size", image_size)})
     return {"camera_poses": cameras, "to_world_coords_matrix": None,
             "position_reference": position_reference,
+            "centroid_mode": os.environ.get("MOCAP_CENTROID_MODE", "integer"),
             "position_reference_description": POSITION_REFERENCE_LABELS[position_reference],
             "kalman_state": ["px", "py", "pz", "vx", "vy", "vz", "ax", "ay", "az"],
             "num_objects": len(templates),

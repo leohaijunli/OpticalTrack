@@ -4,6 +4,9 @@
 16.667 ms 服务时间预算。当前输入来自原有 600 帧视频检测缓存，采样时间仍为 30 fps；
 这项测试验证中心计算成本，不把素材改名为原生 60 fps 数据。
 
+本页保存第一轮优化记录。第二轮进一步减少输入检查/局部几何开销，中心均值 10.23 ms、
+P99 15.07 ms；可选浮点质心的精度取舍见 [进一步优化](further_optimization.md)。
+
 ## 实现
 
 ### 1. 缓存固定相机几何
@@ -47,7 +50,7 @@
 ```powershell
 .\.venv\Scripts\python.exe -m pip install matplotlib
 .\.venv\Scripts\python.exe -m unittest discover -s tests
-.\.venv\Scripts\python.exe tools\benchmark_fusion.py --repeats 3 --out out\rig3\fusion_optimized.json --baseline-report out\rig3\fusion_before.json --cpu-label "Intel Core i7-1255U (10 cores, 12 threads)"
+.\.venv\Scripts\python.exe tools\benchmark_fusion.py --repeats 3 --out out\rig3\fusion_current.json --baseline-report out\rig3\fusion_before.json --cpu-label "Intel Core i7-1255U (10 cores, 12 threads)"
 ```
 
 `--baseline-report` 要求缓存、配置和环境相同；其他计算机应先建立自己的基准。

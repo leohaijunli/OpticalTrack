@@ -66,10 +66,13 @@ class TrackingPipeline:
     def __init__(self, calibration_path, body_specs_path, threshold=140.0,
                  min_area=3, max_area=200, blur_size=9, tolerance=0.025,
                  fps=30.0, process_noise=1.0, measurement_noise=1.0,
-                 reacquire_gap_s=0.5, gate_m=0.5, max_err=6.0, extra_tol=0.05,
-                 position_reference="body_origin", max_speed=10.0):
+                  reacquire_gap_s=0.5, gate_m=0.5, max_err=6.0, extra_tol=0.05,
+                  position_reference="body_origin", max_speed=10.0, centroid_mode="integer"):
         if blur_size < 1 or blur_size % 2 != 1:
             raise ValueError("blur_size must be a positive odd integer")
+        if centroid_mode not in ("integer", "subpixel"):
+            raise ValueError("centroid_mode must be integer or subpixel")
+        self.centroid_mode = centroid_mode
         self.calibration, self.params, self.poses = load_calibration(calibration_path)
         self.camera_names = [camera["name"] for camera in self.calibration["cameras"]]
         self.templates = load_body_templates(body_specs_path)
@@ -100,7 +103,11 @@ class TrackingPipeline:
             "position_reference_description": POSITION_REFERENCE_LABELS[position_reference],
             "max_speed_mps": self.max_speed,
             "kalman_state": ["px", "py", "pz", "vx", "vy", "vz", "ax", "ay", "az"],
-            "kalman_output": "statePre; velocity additionally Butterworth-filtered"})
+             "kalman_output": "statePre; velocity additionally Butterworth-filtered"})
+        # Keep the historical integer configuration unchanged for old cached
+        # regression inputs. Nondefault detection mode is always recorded.
+        if centroid_mode != "integer":
+            self.configuration["centroid_mode"] = centroid_mode
         self.calibration_path = os.path.abspath(calibration_path)
         self.body_specs_path = os.path.abspath(body_specs_path)
         self.geometry_sha256 = {}
@@ -124,7 +131,7 @@ class TrackingPipeline:
                 continue
             prepared = prepare_camera_frame(image, params, True, self.blur_size)
             image_points.append(detect_visible_dots(
-                prepared, self.threshold, self.min_area, self.max_area))
+                prepared, self.threshold, self.min_area, self.max_area, self.centroid_mode))
         return self.process_detections(image_points, timestamp, valid)
 
     def process_detections(self, image_points, timestamp, valid=None):

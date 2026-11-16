@@ -81,7 +81,23 @@ def number(value, signed=False):
     return "—" if value is None else (f"{value:+.3f}" if signed else f"{value:.3f}")
 
 
-def plot_distributions(bodies, data, previous, stats, frame_count, fps, prefix, camera_count):
+def comparison_configuration(current, baseline, allow_centroid_change=False):
+    current, baseline = dict(current), dict(baseline)
+    mode_current = current.pop("centroid_mode", "integer")
+    mode_baseline = baseline.pop("centroid_mode", "integer")
+    if mode_current not in ("integer", "subpixel") or mode_baseline not in ("integer", "subpixel"):
+        raise ValueError("unsupported centroid mode in comparison input")
+    if current != baseline:
+        raise ValueError("comparison requires matching configuration apart from an explicitly allowed centroid change")
+    if mode_current != mode_baseline:
+        if not allow_centroid_change:
+            raise ValueError("different centroid modes require --allow-centroid-change")
+        return {"centroid_mode": {"current": mode_current, "baseline": mode_baseline}}
+    return {}
+
+
+def plot_distributions(bodies, data, previous, stats, frame_count, fps, prefix, camera_count,
+                       current_label="优化后", baseline_label="优化前"):
     setup_plots()
     colors = ["#2563eb", "#d97706", "#059669"]
     maximum = max((np.linalg.norm(v[np.isfinite(v).all(axis=1)], axis=1).max()
@@ -98,18 +114,18 @@ def plot_distributions(bodies, data, previous, stats, frame_count, fps, prefix, 
         ax = axes[0, column]
         if len(current):
             ax.hist(current, bins=bins, weights=np.full(len(current), 100 / len(current)),
-                    color=color, alpha=.65, label="优化后")
+                    color=color, alpha=.65, label=current_label)
         if len(old):
             ax.hist(old, bins=bins, weights=np.full(len(old), 100 / len(old)), histtype="step",
-                    color="#334155", linestyle="--", linewidth=1.5, label="优化前")
+                    color="#334155", linestyle="--", linewidth=1.5, label=baseline_label)
         ax.set_title(f"{body['name']}  |  有效 {stat['valid_frames']}/{frame_count} 帧\n"
                      f"均值 {number(stat['mean_mm'])} mm，RMSE {number(stat['rmse_mm'])} mm",
                      fontsize=12, pad=12)
         ax.set(xlabel="机体原点位置误差 (mm)", ylabel="有效样本比例 (%)", xlim=(0, limit))
         ax.grid(axis="y", alpha=.18)
         ax = axes[1, column]
-        for values, label, line_color, style in ((old, "优化前", "#334155", "--"),
-                                                 (current, "优化后", color, "-")):
+        for values, label, line_color, style in ((old, baseline_label, "#334155", "--"),
+                                                 (current, current_label, color, "-")):
             if len(values):
                 ax.step(np.r_[0, np.sort(values), limit],
                         np.r_[0, np.arange(1, len(values) + 1) * 100 / len(values), 100],
@@ -121,10 +137,10 @@ def plot_distributions(bodies, data, previous, stats, frame_count, fps, prefix, 
                      f"最大 {number(stat['max_mm'])} mm", fontsize=11, pad=12)
     handles, labels = axes[0, 0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="upper right", bbox_to_anchor=(.99, .955), frameon=False, ncol=2)
-    fig.suptitle(f"优化后定位误差分布与累计分布  |  {camera_count} 相机 · {frame_count} 帧 · {fps:g} fps 素材",
+    fig.suptitle(f"{current_label}定位误差分布与累计分布  |  {camera_count} 相机 · {frame_count} 帧 · {fps:g} fps 素材",
                  fontsize=16, y=.995)
     fig.text(.02, .025, "统计参考点：机体几何原点；误差为 Kalman 输出与同帧真值的三维距离。\n"
-             "直方图与累计分布按有效样本统计；无解帧计入覆盖率，不按零误差计分。两版曲线重合表示误差保持一致。",
+              "直方图与累计分布按有效样本统计；无解帧计入覆盖率，不按零误差计分。未使用真值反向校正估计。",
              fontsize=10, color="#475569")
     fig.tight_layout(rect=(0, .08, 1, .93), h_pad=2.5, w_pad=2)
     fig.savefig(str(prefix) + ".png", dpi=170)
@@ -151,7 +167,7 @@ def plot_distributions(bodies, data, previous, stats, frame_count, fps, prefix, 
         ax.grid(axis="y", alpha=.18)
     handles, labels = axes[0, 0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="upper right", bbox_to_anchor=(.99, .955), ncol=3, frameon=False)
-    fig.suptitle("优化后定位的 XYZ 分量误差分布", fontsize=16, y=.995)
+    fig.suptitle(f"{current_label}定位的 XYZ 分量误差分布", fontsize=16, y=.995)
     fig.tight_layout(rect=(0, .02, 1, .87), w_pad=2)
     fig.savefig(str(prefix) + "_xyz.png", dpi=170)
     plt.close(fig)
@@ -162,10 +178,14 @@ def main():
     parser.add_argument("--cache", type=Path, default=ROOT / "out/rig3/tracking_optimized.json")
     parser.add_argument("--baseline", type=Path, default=ROOT / "out/rig3/tracking_from_video.json")
     parser.add_argument("--out-prefix", type=Path, default=ROOT / "out/rig3/position_error_distribution")
+    parser.add_argument("--allow-centroid-change", action="store_true",
+                        help="compare integer/subpixel modes; all other parameters must still match")
     args = parser.parse_args()
     current = json.loads(args.cache.read_text(encoding="utf-8"))
     previous = json.loads(args.baseline.read_text(encoding="utf-8"))
-    for key in ("configuration", "geometry_sha256", "selected_frames", "provenance", "truth_source"):
+    changes = comparison_configuration(current["summary"]["configuration"],
+                                       previous["summary"]["configuration"], args.allow_centroid_change)
+    for key in ("geometry_sha256", "selected_frames", "provenance", "truth_source"):
         if current["summary"][key] != previous["summary"][key]:
             raise ValueError(f"comparison requires matching {key}")
     if current["summary"]["position_reference_key"] != "body_origin":
@@ -187,7 +207,7 @@ def main():
         old_filtered, old_raw = series(previous["records"], key)
         data[key], old_data[key] = filtered, old_filtered
         stats = {"name": body["name"], "filtered": summarize(filtered, frames, fps),
-                 "raw": summarize(raw, frames, fps)}
+                 "raw": summarize(raw, frames, fps), "baseline_filtered": summarize(old_filtered, frames, fps)}
         same_valid = np.array_equal(np.isfinite(filtered), np.isfinite(old_filtered))
         paired = np.isfinite(filtered).all(axis=1) & np.isfinite(old_filtered).all(axis=1)
         paired_raw = np.isfinite(raw).all(axis=1) & np.isfinite(old_raw).all(axis=1)
@@ -195,6 +215,13 @@ def main():
                                "raw_availability_identical": np.array_equal(np.isfinite(raw), np.isfinite(old_raw)),
                                "max_filtered_change_mm": float(np.linalg.norm(filtered[paired] - old_filtered[paired], axis=1).max()) if paired.any() else None,
                                "max_raw_change_mm": float(np.linalg.norm(raw[paired_raw] - old_raw[paired_raw], axis=1).max()) if paired_raw.any() else None}
+        paired_current = np.linalg.norm(filtered[paired], axis=1)
+        paired_baseline = np.linalg.norm(old_filtered[paired], axis=1)
+        stats["comparison"].update({
+            "paired_current_mean_mm": float(paired_current.mean()) if paired.any() else None,
+            "paired_baseline_mean_mm": float(paired_baseline.mean()) if paired.any() else None,
+            "paired_current_p95_mm": float(np.percentile(paired_current, 95)) if paired.any() else None,
+            "paired_baseline_p95_mm": float(np.percentile(paired_baseline, 95)) if paired.any() else None})
         statistics[str(key)] = stats
         row = {"body_id": key, "name": body["name"]}
         row.update({k: v for k, v in stats["filtered"].items() if not isinstance(v, (list, dict))})
@@ -203,7 +230,12 @@ def main():
               "frame_count": len(frames), "fps_capture": fps,
               "reference": "body_origin; calibrated world; millimetres",
               "note": "Euclidean filtered position error; quantiles conditional on valid tracking",
-              "algorithm_sha256": current["summary"]["algorithm_sha256"], "bodies": statistics}
+              "algorithm_sha256": current["summary"]["algorithm_sha256"], "bodies": statistics,
+              "configuration_changes": changes}
+    report["all_bodies_available_percent"] = float(100 * np.logical_and.reduce(
+        [np.isfinite(vectors).all(axis=1) for vectors in data.values()]).mean())
+    report["baseline_all_bodies_available_percent"] = float(100 * np.logical_and.reduce(
+        [np.isfinite(vectors).all(axis=1) for vectors in old_data.values()]).mean())
     for key, path in (("cache_sha256", args.cache), ("baseline_sha256", args.baseline), ("script_sha256", Path(__file__))):
         with path.open("rb") as handle:
             report[key] = hashlib.file_digest(handle, "sha256").hexdigest()
@@ -213,8 +245,11 @@ def main():
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
+    labels = {"integer": "整数质心", "subpixel": "浮点质心"}
+    current_label, baseline_label = ("优化后", "优化前") if not changes else (
+        labels[changes["centroid_mode"]["current"]], labels[changes["centroid_mode"]["baseline"]])
     plot_distributions(bodies, data, old_data, statistics, len(frames), fps, args.out_prefix,
-                       len(current["summary"]["camera_names"]))
+                       len(current["summary"]["camera_names"]), current_label, baseline_label)
     for stats in statistics.values():
         values = stats["filtered"]
         print(f"{stats['name']}: coverage={values['coverage_percent']:.2f}%, mean={number(values['mean_mm'])}, "

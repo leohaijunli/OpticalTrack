@@ -86,7 +86,8 @@ def evaluate_case(job):
     configuration = cache["summary"]["configuration"]
     fps = cache["summary"]["fps"]
     pipeline = TrackingPipeline(os.path.join(job["rig_dir"], "cameras_calib.json"),
-                                 os.path.join(job["rig_dir"], "rig_blender.json"), fps=fps)
+                                 os.path.join(job["rig_dir"], "rig_blender.json"), fps=fps,
+                                 centroid_mode=configuration.get("centroid_mode", "integer"))
     if (configuration != pipeline.configuration or
             cache["summary"]["geometry_sha256"] != pipeline.geometry_sha256):
         raise ValueError("cache is not from the current baseline configuration/geometry")
@@ -160,7 +161,8 @@ def main():
     with open(args.cache, encoding="utf-8") as handle:
         cache = json.load(handle)
     pipeline = TrackingPipeline(os.path.join(args.rig_dir, "cameras_calib.json"),
-                                 os.path.join(args.rig_dir, "rig_blender.json"), fps=cache["summary"]["fps"])
+                                 os.path.join(args.rig_dir, "rig_blender.json"), fps=cache["summary"]["fps"],
+                                 centroid_mode=cache["summary"]["configuration"].get("centroid_mode", "integer"))
     profile = profile_fusion(cache, pipeline, args.profile_frames)
     truth = truth_tables(args.trajectory, pipeline.templates, fps=cache["summary"]["fps"],
                          position_reference="body_origin")
