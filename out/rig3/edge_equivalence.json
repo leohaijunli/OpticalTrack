@@ -1,0 +1,28 @@
+{
+  "frames_checked": [
+    0,
+    50,
+    150,
+    300,
+    450,
+    599
+  ],
+  "frames_equal": 6,
+  "fusion_identical": true,
+  "path": "centralised detection vs six edge nodes -> same central fusion",
+  "same_fusion_output": "per-frame locate_bodies + Kalman pos/vel/acc identical",
+  "points_bytes_per_frame_total": 876.0,
+  "points_kbps_per_cam": 25.66,
+  "points_total_mbps": 0.21,
+  "raw_gray_mbps_per_cam": 245.8,
+  "h264_monitor_mbps_per_cam": 6.0,
+  "single_1GbE_headroom_mbps": 962.73856,
+  "detections_per_frame": {
+    "0": 12.0,
+    "1": 12.0,
+    "2": 12.0,
+    "3": 12.0,
+    "4": 12.0,
+    "5": 12.0
+  }
+}
