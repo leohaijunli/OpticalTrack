@@ -1,0 +1,1550 @@
+{
+  "created_utc": "2026-11-16T07:18:22.169769+00:00",
+  "scope": "single-factor perturbations of actual decoded video centroids; not measured hardware degradation",
+  "fps": 30,
+  "frame_count": 600,
+  "seed": 20261116,
+  "centroid_noise_model": "independent Gaussian per point/axis/frame, after detection; one seeded realization",
+  "lag_model": "CAM04..06 use previous video frame after frame 0; timestamp intentionally mislabeled as current",
+  "calibration_model": "alternating +/-0.05 degrees about each camera local Y axis; centre fixed",
+  "metric_note": "errors are conditional on available output; coverage and longest gaps reported separately; nearest body is not a formal ID-switch metric",
+  "configuration": {
+    "threshold": 140.0,
+    "blur_size": 9,
+    "min_area": 3,
+    "max_area": 200,
+    "tolerance_m": 0.025,
+    "fps": 30.0,
+    "motion_gate_m": 0.5,
+    "mean_reprojection_mse_limit_px2": 6.0,
+    "extra_marker_tolerance_m": 0.05,
+    "reacquire_gap_s": 0.5,
+    "process_noise": 1.0,
+    "measurement_noise": 1.0,
+    "position_reference": "body_origin",
+    "position_reference_description": "body-frame origin (0, 0, 0), geometric reference",
+    "max_speed_mps": 10.0,
+    "kalman_state": [
+      "px",
+      "py",
+      "pz",
+      "vx",
+      "vy",
+      "vz",
+      "ax",
+      "ay",
+      "az"
+    ],
+    "kalman_output": "statePre; velocity additionally Butterworth-filtered"
+  },
+  "geometry_sha256": {
+    "calibration": "f983390287ada0fc7cb34e582099da7c60b6834b396480935fcbac8297f543f4",
+    "body_specs": "3635defc5818840fb0947999a9e8105da14d02827482594fd250b9a72e6b3ed3"
+  },
+  "cache_sha256": "36063b725c371a117e22174d79c887f3bbff30ff2b9fc17295e8a0bebb62d41c",
+  "trajectory_sha256": "00fc38213bfe86235de6ed9dde90f2593a65c11cd72fd07ec4a8927cdd039dc6",
+  "script_sha256": "2b74df775d1e5aef239ea6c5e3db8015213a518ca04e5e800bf22a07e8f64702",
+  "motion": {
+    "0": {
+      "max_speed_mps": 1.5519360424965978
+    },
+    "1": {
+      "max_speed_mps": 2.5618515764969665
+    },
+    "2": {
+      "max_speed_mps": 1.848086321035898
+    }
+  },
+  "profile": {
+    "frame_count": 60,
+    "total_instrumented_s": 10.693340299999996,
+    "note": "cProfile adds overhead; cumulative entries overlap; use edge_equivalence.json for uninstrumented service time",
+    "top_cumulative": [
+      {
+        "function": "adapters/low_cost_mocap/tracking_pipeline.py:130:process_detections",
+        "calls": 60,
+        "self_s": 0.006694500000000001,
+        "cumulative_s": 10.690623800000001
+      },
+      {
+        "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/helpers.py:647:find_point_correspondance_and_object_points",
+        "calls": 60,
+        "self_s": 0.5457449000000001,
+        "cumulative_s": 9.2668552
+      },
+      {
+        "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/helpers.py:537:calculate_reprojection_error",
+        "calls": 3663,
+        "self_s": 0.7595351,
+        "cumulative_s": 3.2778621
+      },
+      {
+        "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/helpers.py:606:triangulate_point",
+        "calls": 3683,
+        "self_s": 0.11249340000000001,
+        "cumulative_s": 2.9131665
+      },
+      {
+        "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/helpers.py:49:fundamental_from_projections",
+        "calls": 3847,
+        "self_s": 0.1871882,
+        "cumulative_s": 1.2923257000000001
+      },
+      {
+        "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/helpers.py:106:_projection_for_pose",
+        "calls": 21661,
+        "self_s": 0.2869874,
+        "cumulative_s": 1.2483948
+      },
+      {
+        "function": "adapters/low_cost_mocap/multi_body.py:368:locate_bodies",
+        "calls": 60,
+        "self_s": 0.14726830000000002,
+        "cumulative_s": 1.2201329
+      },
+      {
+        "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/helpers.py:617:DLT",
+        "calls": 3663,
+        "self_s": 0.5733236,
+        "cumulative_s": 1.2103186000000001
+      },
+      {
+        "function": ".venv/Lib/site-packages/numpy/lib/_index_tricks_impl.py:343:__getitem__",
+        "calls": 21661,
+        "self_s": 0.6761334,
+        "cumulative_s": 0.9042450000000001
+      },
+      {
+        "function": "../../miniconda3/Lib/copy.py:119:deepcopy",
+        "calls": 130886,
+        "self_s": 0.33839240000000004,
+        "cumulative_s": 0.8213640000000001
+      },
+      {
+        "function": "~:0:<projectPoints>",
+        "calls": 21301,
+        "self_s": 0.8106099000000001,
+        "cumulative_s": 0.8106099000000001
+      },
+      {
+        "function": "../../miniconda3/Lib/copy.py:192:_deepcopy_list",
+        "calls": 54235,
+        "self_s": 0.1773509,
+        "cumulative_s": 0.7871722000000001
+      },
+      {
+        "function": ".venv/Lib/site-packages/numpy/linalg/_linalg.py:2170:pinv",
+        "calls": 3847,
+        "self_s": 0.2222434,
+        "cumulative_s": 0.7264385000000001
+      },
+      {
+        "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/helpers.py:110:_valid_image_point",
+        "calls": 48332,
+        "self_s": 0.10147600000000001,
+        "cumulative_s": 0.7054854
+      },
+      {
+        "function": "adapters/low_cost_mocap/multi_body.py:265:_assign_geometry",
+        "calls": 173,
+        "self_s": 0.0029174,
+        "cumulative_s": 0.6780572
+      },
+      {
+        "function": ".venv/Lib/site-packages/numpy/linalg/_linalg.py:1666:svd",
+        "calls": 8386,
+        "self_s": 0.4422768,
+        "cumulative_s": 0.6777216
+      },
+      {
+        "function": "adapters/low_cost_mocap/multi_body.py:222:_rigid_assignment",
+        "calls": 346,
+        "self_s": 0.0624228,
+        "cumulative_s": 0.6741287
+      },
+      {
+        "function": "~:0:<built-in method builtins.all>",
+        "calls": 48332,
+        "self_s": 0.1096401,
+        "cumulative_s": 0.5857089000000001
+      },
+      {
+        "function": ".venv/Lib/site-packages/numpy/lib/_shape_base_impl.py:513:expand_dims",
+        "calls": 21301,
+        "self_s": 0.1997133,
+        "cumulative_s": 0.5587458000000001
+      },
+      {
+        "function": ".venv/Lib/site-packages/scipy/linalg/_decomp_svd.py:37:svd",
+        "calls": 3663,
+        "self_s": 0.08382250000000001,
+        "cumulative_s": 0.5462710000000001
+      },
+      {
+        "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/helpers.py:111:<genexpr>",
+        "calls": 142088,
+        "self_s": 0.4760688,
+        "cumulative_s": 0.4760688
+      },
+      {
+        "function": "~:0:<built-in method numpy.array>",
+        "calls": 171544,
+        "self_s": 0.37677910000000003,
+        "cumulative_s": 0.3781485
+      },
+      {
+        "function": "adapters/low_cost_mocap/multi_body.py:179:rigid_pose",
+        "calls": 692,
+        "self_s": 0.094406,
+        "cumulative_s": 0.3204051
+      },
+      {
+        "function": ".venv/Lib/site-packages/numpy/_core/fromnumeric.py:3737:mean",
+        "calls": 4877,
+        "self_s": 0.07594820000000001,
+        "cumulative_s": 0.2713255
+      },
+      {
+        "function": "adapters/low_cost_mocap/multi_body.py:203:_pose_fields",
+        "calls": 346,
+        "self_s": 0.022717300000000003,
+        "cumulative_s": 0.2509002
+      }
+    ],
+    "top_self": [
+      {
+        "function": "~:0:<projectPoints>",
+        "calls": 21301,
+        "self_s": 0.8106099000000001,
+        "cumulative_s": 0.8106099000000001
+      },
+      {
+        "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/helpers.py:537:calculate_reprojection_error",
+        "calls": 3663,
+        "self_s": 0.7595351,
+        "cumulative_s": 3.2778621
+      },
+      {
+        "function": ".venv/Lib/site-packages/numpy/lib/_index_tricks_impl.py:343:__getitem__",
+        "calls": 21661,
+        "self_s": 0.6761334,
+        "cumulative_s": 0.9042450000000001
+      },
+      {
+        "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/helpers.py:617:DLT",
+        "calls": 3663,
+        "self_s": 0.5733236,
+        "cumulative_s": 1.2103186000000001
+      },
+      {
+        "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/helpers.py:647:find_point_correspondance_and_object_points",
+        "calls": 60,
+        "self_s": 0.5457449000000001,
+        "cumulative_s": 9.2668552
+      },
+      {
+        "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/helpers.py:111:<genexpr>",
+        "calls": 142088,
+        "self_s": 0.4760688,
+        "cumulative_s": 0.4760688
+      },
+      {
+        "function": ".venv/Lib/site-packages/numpy/linalg/_linalg.py:1666:svd",
+        "calls": 8386,
+        "self_s": 0.4422768,
+        "cumulative_s": 0.6777216
+      },
+      {
+        "function": "~:0:<built-in method numpy.array>",
+        "calls": 171544,
+        "self_s": 0.37677910000000003,
+        "cumulative_s": 0.3781485
+      },
+      {
+        "function": "../../miniconda3/Lib/copy.py:119:deepcopy",
+        "calls": 130886,
+        "self_s": 0.33839240000000004,
+        "cumulative_s": 0.8213640000000001
+      },
+      {
+        "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/helpers.py:106:_projection_for_pose",
+        "calls": 21661,
+        "self_s": 0.2869874,
+        "cumulative_s": 1.2483948
+      },
+      {
+        "function": "~:0:<method 'reduce' of 'numpy.ufunc' objects>",
+        "calls": 34564,
+        "self_s": 0.2344486,
+        "cumulative_s": 0.2344486
+      },
+      {
+        "function": ".venv/Lib/site-packages/numpy/linalg/_linalg.py:2170:pinv",
+        "calls": 3847,
+        "self_s": 0.2222434,
+        "cumulative_s": 0.7264385000000001
+      },
+      {
+        "function": ".venv/Lib/site-packages/numpy/lib/_shape_base_impl.py:513:expand_dims",
+        "calls": 21301,
+        "self_s": 0.1997133,
+        "cumulative_s": 0.5587458000000001
+      },
+      {
+        "function": "~:0:<built-in method numpy.asarray>",
+        "calls": 96233,
+        "self_s": 0.1898783,
+        "cumulative_s": 0.1898783
+      },
+      {
+        "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/helpers.py:49:fundamental_from_projections",
+        "calls": 3847,
+        "self_s": 0.1871882,
+        "cumulative_s": 1.2923257000000001
+      },
+      {
+        "function": "../../miniconda3/Lib/copy.py:192:_deepcopy_list",
+        "calls": 54235,
+        "self_s": 0.1773509,
+        "cumulative_s": 0.7871722000000001
+      },
+      {
+        "function": "~:0:<built-in method scipy.linalg._batched_linalg._svd>",
+        "calls": 3663,
+        "self_s": 0.1659584,
+        "cumulative_s": 0.1659584
+      },
+      {
+        "function": ".venv/Lib/site-packages/numpy/_core/numeric.py:1427:normalize_axis_tuple",
+        "calls": 21301,
+        "self_s": 0.15953,
+        "cumulative_s": 0.2275944
+      },
+      {
+        "function": "adapters/low_cost_mocap/multi_body.py:368:locate_bodies",
+        "calls": 60,
+        "self_s": 0.14726830000000002,
+        "cumulative_s": 1.2201329
+      },
+      {
+        "function": "~:0:<method 'extend' of 'list' objects>",
+        "calls": 21470,
+        "self_s": 0.1449646,
+        "cumulative_s": 0.14571140000000002
+      },
+      {
+        "function": "~:0:<method 'append' of 'list' objects>",
+        "calls": 327569,
+        "self_s": 0.14161200000000002,
+        "cumulative_s": 0.14161200000000002
+      },
+      {
+        "function": "~:0:<method 'astype' of 'numpy.ndarray' objects>",
+        "calls": 47146,
+        "self_s": 0.13222,
+        "cumulative_s": 0.13222
+      },
+      {
+        "function": "~:0:<built-in method builtins.isinstance>",
+        "calls": 231263,
+        "self_s": 0.12988260000000001,
+        "cumulative_s": 0.1488323
+      },
+      {
+        "function": "~:0:<method 'get' of 'dict' objects>",
+        "calls": 288027,
+        "self_s": 0.123657,
+        "cumulative_s": 0.123657
+      },
+      {
+        "function": "adapters/low_cost_mocap/low-cost-mocap/computer_code/api/helpers.py:606:triangulate_point",
+        "calls": 3683,
+        "self_s": 0.11249340000000001,
+        "cumulative_s": 2.9131665
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "baseline",
+      "scores": {
+        "bodies": {
+          "0": {
+            "coverage_percent": 98.33333333333333,
+            "position_error_mm": {
+              "count": 590,
+              "mean": 3.511072014037178,
+              "p95": 4.51806111550393,
+              "max": 13.110244023433182,
+              "rmse": 3.610795734332766
+            },
+            "speed_absolute_error_mps": {
+              "count": 589,
+              "mean": 0.036009370445968046,
+              "p95": 0.11999374706282706,
+              "max": 0.4536392785655211,
+              "rmse": 0.056910632163303845
+            },
+            "rotation_error_deg": {
+              "count": 590,
+              "mean": 0.21233459400731075,
+              "p95": 0.4037986292866189,
+              "max": 1.010428481512839,
+              "rmse": 0.24332079934080286
+            },
+            "longest_missing_frames": 3,
+            "longest_missing_duration_s": 0.1,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 1
+          },
+          "1": {
+            "coverage_percent": 100.0,
+            "position_error_mm": {
+              "count": 600,
+              "mean": 3.370545412888107,
+              "p95": 5.2752786653721415,
+              "max": 8.709397002726819,
+              "rmse": 3.4776236735539716
+            },
+            "speed_absolute_error_mps": {
+              "count": 599,
+              "mean": 0.04300841572501096,
+              "p95": 0.1756127422377823,
+              "max": 0.2695373418771221,
+              "rmse": 0.06910118447379188
+            },
+            "rotation_error_deg": {
+              "count": 600,
+              "mean": 0.38253235752396914,
+              "p95": 0.8069635831570312,
+              "max": 1.0942806014821151,
+              "rmse": 0.4372323849177825
+            },
+            "longest_missing_frames": 0,
+            "longest_missing_duration_s": 0.0,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 0
+          },
+          "2": {
+            "coverage_percent": 96.5,
+            "position_error_mm": {
+              "count": 579,
+              "mean": 4.301389509193948,
+              "p95": 6.000418532921855,
+              "max": 17.005012557722157,
+              "rmse": 4.570671111785396
+            },
+            "speed_absolute_error_mps": {
+              "count": 578,
+              "mean": 0.040551534731571234,
+              "p95": 0.13881945278294297,
+              "max": 0.6058740395880349,
+              "rmse": 0.0649535630986594
+            },
+            "rotation_error_deg": {
+              "count": 579,
+              "mean": 0.36113176928079616,
+              "p95": 0.6628729032869176,
+              "max": 4.285679449987571,
+              "rmse": 0.5375433573473756
+            },
+            "longest_missing_frames": 3,
+            "longest_missing_duration_s": 0.1,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 4
+          }
+        },
+        "all_bodies_available_percent": 95.0,
+        "pooled_position_error_mm": {
+          "count": 1769,
+          "mean": 3.722082680518991,
+          "p95": 5.227021866296145,
+          "max": 17.005012557722157,
+          "rmse": 3.9099934157425063
+        },
+        "pooled_rotation_error_deg": {
+          "count": 1769,
+          "mean": 0.3187632105100485,
+          "p95": 0.696133856776688,
+          "max": 4.285679449987571,
+          "rmse": 0.42327557806393834
+        }
+      }
+    },
+    {
+      "name": "drop_CAM01",
+      "drop_camera": 0,
+      "scores": {
+        "bodies": {
+          "0": {
+            "coverage_percent": 98.66666666666667,
+            "position_error_mm": {
+              "count": 592,
+              "mean": 3.5502208328345923,
+              "p95": 4.802720330405678,
+              "max": 9.699255990309947,
+              "rmse": 3.63101249789944
+            },
+            "speed_absolute_error_mps": {
+              "count": 591,
+              "mean": 0.035888774033713544,
+              "p95": 0.12306297107240084,
+              "max": 0.31481233413823384,
+              "rmse": 0.053999059806706606
+            },
+            "rotation_error_deg": {
+              "count": 592,
+              "mean": 0.22349288812582926,
+              "p95": 0.4413546690154479,
+              "max": 1.0043870485046422,
+              "rmse": 0.2585431902433982
+            },
+            "longest_missing_frames": 2,
+            "longest_missing_duration_s": 0.06666666666666667,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 2
+          },
+          "1": {
+            "coverage_percent": 100.0,
+            "position_error_mm": {
+              "count": 600,
+              "mean": 3.4440158564863395,
+              "p95": 5.348834610404564,
+              "max": 9.716175310515771,
+              "rmse": 3.568599678375412
+            },
+            "speed_absolute_error_mps": {
+              "count": 599,
+              "mean": 0.04348369533686839,
+              "p95": 0.17298732410155518,
+              "max": 0.26924303803685656,
+              "rmse": 0.06956156185860035
+            },
+            "rotation_error_deg": {
+              "count": 600,
+              "mean": 0.4148275959414907,
+              "p95": 0.8842376070337602,
+              "max": 1.5050775510011192,
+              "rmse": 0.4789378922317127
+            },
+            "longest_missing_frames": 0,
+            "longest_missing_duration_s": 0.0,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 1
+          },
+          "2": {
+            "coverage_percent": 94.66666666666667,
+            "position_error_mm": {
+              "count": 568,
+              "mean": 4.40086879229011,
+              "p95": 6.432239071668232,
+              "max": 21.113194988506052,
+              "rmse": 4.768971912763922
+            },
+            "speed_absolute_error_mps": {
+              "count": 567,
+              "mean": 0.04126744808206126,
+              "p95": 0.1465554040456455,
+              "max": 0.728422161457293,
+              "rmse": 0.07627373512157051
+            },
+            "rotation_error_deg": {
+              "count": 568,
+              "mean": 0.36491922088267803,
+              "p95": 0.7147418485989875,
+              "max": 5.702074273008413,
+              "rmse": 0.49307498464877464
+            },
+            "longest_missing_frames": 10,
+            "longest_missing_duration_s": 0.3333333333333333,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 2
+          }
+        },
+        "all_bodies_available_percent": 94.33333333333333,
+        "pooled_position_error_mm": {
+          "count": 1760,
+          "mean": 3.7885418869037872,
+          "p95": 5.317961971142234,
+          "max": 21.113194988506052,
+          "rmse": 4.014469293299743
+        },
+        "pooled_rotation_error_deg": {
+          "count": 1760,
+          "mean": 0.3343627640890605,
+          "p95": 0.75598431431819,
+          "max": 5.702074273008413,
+          "rmse": 0.42325492335136106
+        }
+      }
+    },
+    {
+      "name": "drop_CAM02",
+      "drop_camera": 1,
+      "scores": {
+        "bodies": {
+          "0": {
+            "coverage_percent": 98.33333333333333,
+            "position_error_mm": {
+              "count": 590,
+              "mean": 3.590938744113082,
+              "p95": 4.656574078359206,
+              "max": 12.69680863420966,
+              "rmse": 3.6894867919845113
+            },
+            "speed_absolute_error_mps": {
+              "count": 589,
+              "mean": 0.03644365125644556,
+              "p95": 0.12018039396515313,
+              "max": 0.45455130466500193,
+              "rmse": 0.0572417920324017
+            },
+            "rotation_error_deg": {
+              "count": 590,
+              "mean": 0.23703519892416963,
+              "p95": 0.433042011562216,
+              "max": 1.1032960288115892,
+              "rmse": 0.27106807039201203
+            },
+            "longest_missing_frames": 3,
+            "longest_missing_duration_s": 0.1,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 1
+          },
+          "1": {
+            "coverage_percent": 99.66666666666667,
+            "position_error_mm": {
+              "count": 598,
+              "mean": 3.443381057358002,
+              "p95": 5.260829586461345,
+              "max": 9.185160051866287,
+              "rmse": 3.561593432709492
+            },
+            "speed_absolute_error_mps": {
+              "count": 597,
+              "mean": 0.04404515243407731,
+              "p95": 0.17705434166883408,
+              "max": 0.26541719470265857,
+              "rmse": 0.06991136457229594
+            },
+            "rotation_error_deg": {
+              "count": 598,
+              "mean": 0.4076083281088836,
+              "p95": 0.8517941606990125,
+              "max": 1.4539021499469387,
+              "rmse": 0.47045802606662696
+            },
+            "longest_missing_frames": 1,
+            "longest_missing_duration_s": 0.03333333333333333,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 0
+          },
+          "2": {
+            "coverage_percent": 95.83333333333333,
+            "position_error_mm": {
+              "count": 575,
+              "mean": 4.330298812619431,
+              "p95": 5.635145364263467,
+              "max": 27.1402949063171,
+              "rmse": 4.6526528636905615
+            },
+            "speed_absolute_error_mps": {
+              "count": 574,
+              "mean": 0.040205018948664004,
+              "p95": 0.13981026771762772,
+              "max": 0.676704076521172,
+              "rmse": 0.06642969132481404
+            },
+            "rotation_error_deg": {
+              "count": 575,
+              "mean": 0.37250477555257466,
+              "p95": 0.6993088729885187,
+              "max": 3.660959272987276,
+              "rmse": 0.49170722798157523
+            },
+            "longest_missing_frames": 5,
+            "longest_missing_duration_s": 0.16666666666666666,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 2
+          }
+        },
+        "all_bodies_available_percent": 94.0,
+        "pooled_position_error_mm": {
+          "count": 1763,
+          "mean": 3.7820292391281773,
+          "p95": 5.252502548091726,
+          "max": 27.1402949063171,
+          "rmse": 3.9897764309085764
+        },
+        "pooled_rotation_error_deg": {
+          "count": 1763,
+          "mean": 0.33907588968638847,
+          "p95": 0.7492920048174582,
+          "max": 3.660959272987276,
+          "rmse": 0.42251505709280734
+        }
+      }
+    },
+    {
+      "name": "drop_CAM03",
+      "drop_camera": 2,
+      "scores": {
+        "bodies": {
+          "0": {
+            "coverage_percent": 98.5,
+            "position_error_mm": {
+              "count": 591,
+              "mean": 3.5724865223767384,
+              "p95": 4.673902053402359,
+              "max": 12.664918941066116,
+              "rmse": 3.6619138641813618
+            },
+            "speed_absolute_error_mps": {
+              "count": 590,
+              "mean": 0.03607102916846796,
+              "p95": 0.12141103162485957,
+              "max": 0.4602896822361079,
+              "rmse": 0.05612805951690306
+            },
+            "rotation_error_deg": {
+              "count": 591,
+              "mean": 0.2389301858868909,
+              "p95": 0.4560257379598308,
+              "max": 1.2128170116501211,
+              "rmse": 0.2747403129463693
+            },
+            "longest_missing_frames": 3,
+            "longest_missing_duration_s": 0.1,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 2
+          },
+          "1": {
+            "coverage_percent": 99.66666666666667,
+            "position_error_mm": {
+              "count": 598,
+              "mean": 3.511950393469595,
+              "p95": 5.404357623217045,
+              "max": 8.990836514465684,
+              "rmse": 3.6131768122054684
+            },
+            "speed_absolute_error_mps": {
+              "count": 597,
+              "mean": 0.0434853442254132,
+              "p95": 0.18072090694690715,
+              "max": 0.2758572313571309,
+              "rmse": 0.06949159271561019
+            },
+            "rotation_error_deg": {
+              "count": 598,
+              "mean": 0.40583113776735263,
+              "p95": 0.888227471255851,
+              "max": 1.3625566487987057,
+              "rmse": 0.46822351828450937
+            },
+            "longest_missing_frames": 1,
+            "longest_missing_duration_s": 0.03333333333333333,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 0
+          },
+          "2": {
+            "coverage_percent": 95.83333333333333,
+            "position_error_mm": {
+              "count": 575,
+              "mean": 4.2826233687165525,
+              "p95": 5.499313673775215,
+              "max": 26.553801009168616,
+              "rmse": 4.601552004884028
+            },
+            "speed_absolute_error_mps": {
+              "count": 574,
+              "mean": 0.03921258982071807,
+              "p95": 0.1402954259382897,
+              "max": 0.6735303676054616,
+              "rmse": 0.06537805086500216
+            },
+            "rotation_error_deg": {
+              "count": 575,
+              "mean": 0.35974110278342414,
+              "p95": 0.6675284090094624,
+              "max": 4.285401234998617,
+              "rmse": 0.4887087615992851
+            },
+            "longest_missing_frames": 5,
+            "longest_missing_duration_s": 0.16666666666666666,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 2
+          }
+        },
+        "all_bodies_available_percent": 94.16666666666667,
+        "pooled_position_error_mm": {
+          "count": 1764,
+          "mean": 3.7834434847117278,
+          "p95": 5.129875304818539,
+          "max": 26.553801009168616,
+          "rmse": 3.977488437575399
+        },
+        "pooled_rotation_error_deg": {
+          "count": 1764,
+          "mean": 0.33488996278032784,
+          "p95": 0.7265530835783234,
+          "max": 4.285401234998617,
+          "rmse": 0.42126196649880726
+        }
+      }
+    },
+    {
+      "name": "drop_CAM04",
+      "drop_camera": 3,
+      "scores": {
+        "bodies": {
+          "0": {
+            "coverage_percent": 98.83333333333333,
+            "position_error_mm": {
+              "count": 593,
+              "mean": 3.608020065321326,
+              "p95": 4.665330741178561,
+              "max": 17.245178705110455,
+              "rmse": 3.725694221671645
+            },
+            "speed_absolute_error_mps": {
+              "count": 592,
+              "mean": 0.03554076146063307,
+              "p95": 0.11087551508442764,
+              "max": 0.5449005020526972,
+              "rmse": 0.05699058585027892
+            },
+            "rotation_error_deg": {
+              "count": 593,
+              "mean": 0.23016800960584344,
+              "p95": 0.42627051289214124,
+              "max": 1.1300490053124013,
+              "rmse": 0.2613963177152929
+            },
+            "longest_missing_frames": 4,
+            "longest_missing_duration_s": 0.13333333333333333,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 1
+          },
+          "1": {
+            "coverage_percent": 100.0,
+            "position_error_mm": {
+              "count": 600,
+              "mean": 3.568641477931075,
+              "p95": 5.6826027990756,
+              "max": 9.577078999161763,
+              "rmse": 3.7057669982806125
+            },
+            "speed_absolute_error_mps": {
+              "count": 599,
+              "mean": 0.04341336634427804,
+              "p95": 0.17724871358877237,
+              "max": 0.27169702086690417,
+              "rmse": 0.06958732224733645
+            },
+            "rotation_error_deg": {
+              "count": 600,
+              "mean": 0.43775533075024897,
+              "p95": 0.9456815383688238,
+              "max": 1.4936614796902175,
+              "rmse": 0.5062933230077475
+            },
+            "longest_missing_frames": 0,
+            "longest_missing_duration_s": 0.0,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 0
+          },
+          "2": {
+            "coverage_percent": 97.16666666666667,
+            "position_error_mm": {
+              "count": 583,
+              "mean": 4.374085772570856,
+              "p95": 5.696844024320495,
+              "max": 36.502572827767175,
+              "rmse": 4.831581333676567
+            },
+            "speed_absolute_error_mps": {
+              "count": 582,
+              "mean": 0.040972699728525214,
+              "p95": 0.13619060963465626,
+              "max": 0.6911851441786427,
+              "rmse": 0.06903566954475283
+            },
+            "rotation_error_deg": {
+              "count": 583,
+              "mean": 0.38474926299247114,
+              "p95": 0.678103034521119,
+              "max": 5.442342798480427,
+              "rmse": 0.5564993627343175
+            },
+            "longest_missing_frames": 5,
+            "longest_missing_duration_s": 0.16666666666666666,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 4
+          }
+        },
+        "all_bodies_available_percent": 96.33333333333333,
+        "pooled_position_error_mm": {
+          "count": 1776,
+          "mean": 3.8461896345174553,
+          "p95": 5.347486983841792,
+          "max": 36.502572827767175,
+          "rmse": 4.115491647597394
+        },
+        "pooled_rotation_error_deg": {
+          "count": 1776,
+          "mean": 0.3510425948598115,
+          "p95": 0.7757855463154564,
+          "max": 5.442342798480427,
+          "rmse": 0.45942853401979183
+        }
+      }
+    },
+    {
+      "name": "drop_CAM05",
+      "drop_camera": 4,
+      "scores": {
+        "bodies": {
+          "0": {
+            "coverage_percent": 98.16666666666667,
+            "position_error_mm": {
+              "count": 589,
+              "mean": 3.611502176960153,
+              "p95": 4.608079879160695,
+              "max": 18.750288754223686,
+              "rmse": 3.7609873116605557
+            },
+            "speed_absolute_error_mps": {
+              "count": 588,
+              "mean": 0.036428029124415236,
+              "p95": 0.12032515149857385,
+              "max": 0.5506491316227046,
+              "rmse": 0.059405445540651414
+            },
+            "rotation_error_deg": {
+              "count": 589,
+              "mean": 0.23753635527151767,
+              "p95": 0.4317466020905638,
+              "max": 1.177843950552437,
+              "rmse": 0.2763499170277205
+            },
+            "longest_missing_frames": 4,
+            "longest_missing_duration_s": 0.13333333333333333,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 1
+          },
+          "1": {
+            "coverage_percent": 100.0,
+            "position_error_mm": {
+              "count": 600,
+              "mean": 3.474712021122962,
+              "p95": 5.51973074375798,
+              "max": 9.191110415208206,
+              "rmse": 3.609952703293129
+            },
+            "speed_absolute_error_mps": {
+              "count": 599,
+              "mean": 0.04361947927226601,
+              "p95": 0.1760578379518728,
+              "max": 0.2579065184010285,
+              "rmse": 0.06923105083730924
+            },
+            "rotation_error_deg": {
+              "count": 600,
+              "mean": 0.37842636576336,
+              "p95": 0.9396944090515832,
+              "max": 1.3785827561967046,
+              "rmse": 0.44908641522911924
+            },
+            "longest_missing_frames": 0,
+            "longest_missing_duration_s": 0.0,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 0
+          },
+          "2": {
+            "coverage_percent": 96.33333333333333,
+            "position_error_mm": {
+              "count": 578,
+              "mean": 4.359994049057043,
+              "p95": 5.833798295564215,
+              "max": 23.389037345706335,
+              "rmse": 4.592135304553487
+            },
+            "speed_absolute_error_mps": {
+              "count": 577,
+              "mean": 0.0404007691978589,
+              "p95": 0.13503365565369185,
+              "max": 0.6294510638640065,
+              "rmse": 0.06529550065673997
+            },
+            "rotation_error_deg": {
+              "count": 578,
+              "mean": 0.3822100410879275,
+              "p95": 0.7112105125959789,
+              "max": 4.0045460417923255,
+              "rmse": 0.5036335770054622
+            },
+            "longest_missing_frames": 5,
+            "longest_missing_duration_s": 0.16666666666666666,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 5
+          }
+        },
+        "all_bodies_available_percent": 94.83333333333333,
+        "pooled_position_error_mm": {
+          "count": 1767,
+          "mean": 3.8098916554942153,
+          "p95": 5.452644287229299,
+          "max": 23.389037345706335,
+          "rmse": 4.004748851447859
+        },
+        "pooled_rotation_error_deg": {
+          "count": 1767,
+          "mean": 0.33270069975198757,
+          "p95": 0.7156215941725366,
+          "max": 4.0045460417923255,
+          "rmse": 0.4206043753814447
+        }
+      }
+    },
+    {
+      "name": "drop_CAM06",
+      "drop_camera": 5,
+      "scores": {
+        "bodies": {
+          "0": {
+            "coverage_percent": 98.83333333333333,
+            "position_error_mm": {
+              "count": 593,
+              "mean": 3.5750794207459897,
+              "p95": 4.671153059946743,
+              "max": 10.48575303061897,
+              "rmse": 3.656273169725145
+            },
+            "speed_absolute_error_mps": {
+              "count": 592,
+              "mean": 0.03599595033543751,
+              "p95": 0.12936770658634011,
+              "max": 0.3226596134484603,
+              "rmse": 0.05364816406718759
+            },
+            "rotation_error_deg": {
+              "count": 593,
+              "mean": 0.2330234861643204,
+              "p95": 0.4286789222899795,
+              "max": 1.3409262534542448,
+              "rmse": 0.26715310032183937
+            },
+            "longest_missing_frames": 2,
+            "longest_missing_duration_s": 0.06666666666666667,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 0
+          },
+          "1": {
+            "coverage_percent": 100.0,
+            "position_error_mm": {
+              "count": 600,
+              "mean": 3.516239980659234,
+              "p95": 5.706677230653127,
+              "max": 7.582713654908922,
+              "rmse": 3.652612302738314
+            },
+            "speed_absolute_error_mps": {
+              "count": 599,
+              "mean": 0.04353977213080165,
+              "p95": 0.17693758022601935,
+              "max": 0.27273514006379596,
+              "rmse": 0.06934659433910738
+            },
+            "rotation_error_deg": {
+              "count": 600,
+              "mean": 0.42612715713966437,
+              "p95": 0.9844100780455416,
+              "max": 1.3596368974057567,
+              "rmse": 0.4991385529464062
+            },
+            "longest_missing_frames": 0,
+            "longest_missing_duration_s": 0.0,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 0
+          },
+          "2": {
+            "coverage_percent": 98.0,
+            "position_error_mm": {
+              "count": 588,
+              "mean": 4.286180038552333,
+              "p95": 5.540854028232934,
+              "max": 16.61845889500507,
+              "rmse": 4.431349618056538
+            },
+            "speed_absolute_error_mps": {
+              "count": 587,
+              "mean": 0.0392956383918786,
+              "p95": 0.14366429767553546,
+              "max": 0.19688712378669215,
+              "rmse": 0.057639613997922744
+            },
+            "rotation_error_deg": {
+              "count": 588,
+              "mean": 0.3717063643196928,
+              "p95": 0.6430820060900504,
+              "max": 3.461782386584271,
+              "rmse": 0.4828836395132387
+            },
+            "longest_missing_frames": 3,
+            "longest_missing_duration_s": 0.1,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 4
+          }
+        },
+        "all_bodies_available_percent": 96.83333333333333,
+        "pooled_position_error_mm": {
+          "count": 1781,
+          "mean": 3.7900280446752856,
+          "p95": 5.407774755233179,
+          "max": 16.61845889500507,
+          "rmse": 3.9279617185439313
+        },
+        "pooled_rotation_error_deg": {
+          "count": 1781,
+          "mean": 0.34386443784347,
+          "p95": 0.7939096002002397,
+          "max": 3.461782386584271,
+          "rmse": 0.42974359724950406
+        }
+      }
+    },
+    {
+      "name": "centroid_jitter_0.5px",
+      "jitter_sigma_px": 0.5,
+      "scores": {
+        "bodies": {
+          "0": {
+            "coverage_percent": 98.33333333333333,
+            "position_error_mm": {
+              "count": 590,
+              "mean": 3.687177344343939,
+              "p95": 5.154630206410027,
+              "max": 20.348476485878297,
+              "rmse": 3.8739623801640706
+            },
+            "speed_absolute_error_mps": {
+              "count": 589,
+              "mean": 0.03842233536231831,
+              "p95": 0.11339001944214169,
+              "max": 0.576772059288415,
+              "rmse": 0.06086145357182428
+            },
+            "rotation_error_deg": {
+              "count": 590,
+              "mean": 0.37964702043992815,
+              "p95": 0.7136149043060054,
+              "max": 1.5896025664261797,
+              "rmse": 0.4247157502124855
+            },
+            "longest_missing_frames": 4,
+            "longest_missing_duration_s": 0.13333333333333333,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 2
+          },
+          "1": {
+            "coverage_percent": 99.83333333333333,
+            "position_error_mm": {
+              "count": 599,
+              "mean": 3.689311106100265,
+              "p95": 5.625520157072988,
+              "max": 7.798069230447355,
+              "rmse": 3.847609384051474
+            },
+            "speed_absolute_error_mps": {
+              "count": 598,
+              "mean": 0.0468462398617783,
+              "p95": 0.18548128072988637,
+              "max": 0.27047755453828326,
+              "rmse": 0.07163334329276584
+            },
+            "rotation_error_deg": {
+              "count": 599,
+              "mean": 0.5822810165335243,
+              "p95": 1.0669946771041,
+              "max": 2.056192986077277,
+              "rmse": 0.6412560564960843
+            },
+            "longest_missing_frames": 1,
+            "longest_missing_duration_s": 0.03333333333333333,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 2
+          },
+          "2": {
+            "coverage_percent": 96.16666666666667,
+            "position_error_mm": {
+              "count": 577,
+              "mean": 4.505556037649158,
+              "p95": 6.336333968252995,
+              "max": 15.529534837654307,
+              "rmse": 4.733785854357512
+            },
+            "speed_absolute_error_mps": {
+              "count": 576,
+              "mean": 0.0428459661593957,
+              "p95": 0.13959493469593529,
+              "max": 0.5174185311720509,
+              "rmse": 0.06473748215646248
+            },
+            "rotation_error_deg": {
+              "count": 577,
+              "mean": 0.5837368703961784,
+              "p95": 1.133519631980418,
+              "max": 3.676293191966031,
+              "rmse": 0.6812424002479825
+            },
+            "longest_missing_frames": 3,
+            "longest_missing_duration_s": 0.1,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 4
+          }
+        },
+        "all_bodies_available_percent": 94.66666666666667,
+        "pooled_position_error_mm": {
+          "count": 1766,
+          "mean": 3.955287553477093,
+          "p95": 5.831877722202771,
+          "max": 20.348476485878297,
+          "rmse": 4.166139590392926
+        },
+        "pooled_rotation_error_deg": {
+          "count": 1766,
+          "mean": 0.515059028981729,
+          "p95": 0.9973223506198641,
+          "max": 3.676293191966031,
+          "rmse": 0.5927655886171442
+        }
+      }
+    },
+    {
+      "name": "centroid_jitter_1.0px",
+      "jitter_sigma_px": 1.0,
+      "scores": {
+        "bodies": {
+          "0": {
+            "coverage_percent": 98.66666666666667,
+            "position_error_mm": {
+              "count": 592,
+              "mean": 4.178389117504933,
+              "p95": 6.494173140123868,
+              "max": 13.714298751715736,
+              "rmse": 4.426125199463573
+            },
+            "speed_absolute_error_mps": {
+              "count": 591,
+              "mean": 0.04380821376176789,
+              "p95": 0.11104124500185247,
+              "max": 0.4113866596877861,
+              "rmse": 0.06244915034122939
+            },
+            "rotation_error_deg": {
+              "count": 592,
+              "mean": 0.6581452729931581,
+              "p95": 1.2817637654115466,
+              "max": 2.041923600097608,
+              "rmse": 0.7351358263546766
+            },
+            "longest_missing_frames": 2,
+            "longest_missing_duration_s": 0.06666666666666667,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 2
+          },
+          "1": {
+            "coverage_percent": 99.66666666666667,
+            "position_error_mm": {
+              "count": 598,
+              "mean": 4.534416342147777,
+              "p95": 7.653609335043525,
+              "max": 13.526183296806792,
+              "rmse": 4.8417074234540225
+            },
+            "speed_absolute_error_mps": {
+              "count": 597,
+              "mean": 0.056092022555526214,
+              "p95": 0.18086546606893808,
+              "max": 0.2793463194979785,
+              "rmse": 0.07887329978605508
+            },
+            "rotation_error_deg": {
+              "count": 598,
+              "mean": 0.9565526711087208,
+              "p95": 1.744339871366669,
+              "max": 4.0840268329653036,
+              "rmse": 1.052898993413843
+            },
+            "longest_missing_frames": 1,
+            "longest_missing_duration_s": 0.03333333333333333,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 2
+          },
+          "2": {
+            "coverage_percent": 96.33333333333333,
+            "position_error_mm": {
+              "count": 578,
+              "mean": 5.394682333395832,
+              "p95": 8.575216760791973,
+              "max": 25.079823622285915,
+              "rmse": 5.7964052476255805
+            },
+            "speed_absolute_error_mps": {
+              "count": 577,
+              "mean": 0.05274438654359598,
+              "p95": 0.14220458085463317,
+              "max": 0.627806690923943,
+              "rmse": 0.07546374096055102
+            },
+            "rotation_error_deg": {
+              "count": 578,
+              "mean": 1.0043756209078907,
+              "p95": 1.9447168970471638,
+              "max": 4.230307266277801,
+              "rmse": 1.1258249448150854
+            },
+            "longest_missing_frames": 5,
+            "longest_missing_duration_s": 0.16666666666666666,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 3
+          }
+        },
+        "all_bodies_available_percent": 94.83333333333333,
+        "pooled_position_error_mm": {
+          "count": 1768,
+          "mean": 4.696444411125612,
+          "p95": 7.932619150277048,
+          "max": 25.079823622285915,
+          "rmse": 5.04705491107576
+        },
+        "pooled_rotation_error_deg": {
+          "count": 1768,
+          "mean": 0.8722678777260892,
+          "p95": 1.6827211829509234,
+          "max": 4.230307266277801,
+          "rmse": 0.9850340733442401
+        }
+      }
+    },
+    {
+      "name": "CAM04_06_lag_one_frame",
+      "lag_cameras": [
+        3,
+        4,
+        5
+      ],
+      "lag_frames": 1,
+      "scores": {
+        "bodies": {
+          "0": {
+            "coverage_percent": 90.33333333333333,
+            "position_error_mm": {
+              "count": 542,
+              "mean": 18.463810396401733,
+              "p95": 31.341842871134364,
+              "max": 45.21756188188008,
+              "rmse": 19.73949909677534
+            },
+            "speed_absolute_error_mps": {
+              "count": 541,
+              "mean": 0.07527097062880078,
+              "p95": 0.22098150142406287,
+              "max": 0.6043098991289838,
+              "rmse": 0.10913073384893518
+            },
+            "rotation_error_deg": {
+              "count": 542,
+              "mean": 2.1658555892362523,
+              "p95": 3.809305043290249,
+              "max": 90.0264038345681,
+              "rmse": 7.239102799489245
+            },
+            "longest_missing_frames": 5,
+            "longest_missing_duration_s": 0.16666666666666666,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 5
+          },
+          "1": {
+            "coverage_percent": 86.33333333333333,
+            "position_error_mm": {
+              "count": 518,
+              "mean": 17.593185775045196,
+              "p95": 46.18703224559866,
+              "max": 87.22921575848669,
+              "rmse": 21.526562924569692
+            },
+            "speed_absolute_error_mps": {
+              "count": 517,
+              "mean": 0.08244552696596207,
+              "p95": 0.30341034697398167,
+              "max": 0.6263587635342649,
+              "rmse": 0.1348227906986243
+            },
+            "rotation_error_deg": {
+              "count": 518,
+              "mean": 2.3676318870256634,
+              "p95": 6.091343647106123,
+              "max": 150.96060508181822,
+              "rmse": 7.636273901663298
+            },
+            "longest_missing_frames": 6,
+            "longest_missing_duration_s": 0.2,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 7
+          },
+          "2": {
+            "coverage_percent": 91.83333333333333,
+            "position_error_mm": {
+              "count": 551,
+              "mean": 16.023040516561704,
+              "p95": 23.471076737908003,
+              "max": 60.71609479210121,
+              "rmse": 17.261708884048485
+            },
+            "speed_absolute_error_mps": {
+              "count": 550,
+              "mean": 0.06259513195461497,
+              "p95": 0.19681458325003814,
+              "max": 0.6777666738099342,
+              "rmse": 0.09492813561747933
+            },
+            "rotation_error_deg": {
+              "count": 551,
+              "mean": 2.363595667586642,
+              "p95": 3.6343071330353833,
+              "max": 154.28940259597314,
+              "rmse": 9.929180072362485
+            },
+            "longest_missing_frames": 8,
+            "longest_missing_duration_s": 0.26666666666666666,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 15
+          }
+        },
+        "all_bodies_available_percent": 74.16666666666667,
+        "pooled_position_error_mm": {
+          "count": 1611,
+          "mean": 17.34906939227104,
+          "p95": 29.602709560130563,
+          "max": 87.22921575848669,
+          "rmse": 19.544887648576104
+        },
+        "pooled_rotation_error_deg": {
+          "count": 1611,
+          "mean": 2.298366393349213,
+          "p95": 4.047176015652313,
+          "max": 154.28940259597314,
+          "rmse": 8.37259258615184
+        }
+      }
+    },
+    {
+      "name": "calibration_rotation_0.05deg",
+      "calibration_rotation_deg": 0.05,
+      "scores": {
+        "bodies": {
+          "0": {
+            "coverage_percent": 98.5,
+            "position_error_mm": {
+              "count": 591,
+              "mean": 3.524640958251443,
+              "p95": 4.633380874477508,
+              "max": 9.666306137138998,
+              "rmse": 3.60781555616924
+            },
+            "speed_absolute_error_mps": {
+              "count": 590,
+              "mean": 0.035864003655632255,
+              "p95": 0.12108964068938964,
+              "max": 0.3219779384998408,
+              "rmse": 0.054879211182652876
+            },
+            "rotation_error_deg": {
+              "count": 591,
+              "mean": 0.2169937130586294,
+              "p95": 0.4075183998129681,
+              "max": 1.11577912486185,
+              "rmse": 0.25137810728043436
+            },
+            "longest_missing_frames": 2,
+            "longest_missing_duration_s": 0.06666666666666667,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 2
+          },
+          "1": {
+            "coverage_percent": 100.0,
+            "position_error_mm": {
+              "count": 600,
+              "mean": 3.397511827147198,
+              "p95": 5.35726624897441,
+              "max": 8.726669416044624,
+              "rmse": 3.507255541994434
+            },
+            "speed_absolute_error_mps": {
+              "count": 599,
+              "mean": 0.04307578443289802,
+              "p95": 0.17538679849918223,
+              "max": 0.26956275735143176,
+              "rmse": 0.06912505756696863
+            },
+            "rotation_error_deg": {
+              "count": 600,
+              "mean": 0.3885631528497038,
+              "p95": 0.840619315116379,
+              "max": 1.1313713905528882,
+              "rmse": 0.44360568768807224
+            },
+            "longest_missing_frames": 0,
+            "longest_missing_duration_s": 0.0,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 3
+          },
+          "2": {
+            "coverage_percent": 96.16666666666667,
+            "position_error_mm": {
+              "count": 577,
+              "mean": 4.316911718030135,
+              "p95": 5.7097123640672764,
+              "max": 21.941426765147646,
+              "rmse": 4.60427242847152
+            },
+            "speed_absolute_error_mps": {
+              "count": 576,
+              "mean": 0.04022697363906538,
+              "p95": 0.1399249541224453,
+              "max": 0.5801178491041799,
+              "rmse": 0.06508600502066554
+            },
+            "rotation_error_deg": {
+              "count": 577,
+              "mean": 0.35476840264315834,
+              "p95": 0.6558595639706496,
+              "max": 4.278909849141853,
+              "rmse": 0.5139974720827366
+            },
+            "longest_missing_frames": 3,
+            "longest_missing_duration_s": 0.1,
+            "nearest_other_body_count": 0,
+            "temporal_prior_count": 4
+          }
+        },
+        "all_bodies_available_percent": 94.83333333333333,
+        "pooled_position_error_mm": {
+          "count": 1768,
+          "mean": 3.740061065564655,
+          "p95": 5.256692030205016,
+          "max": 21.941426765147646,
+          "rmse": 3.9298981605443553
+        },
+        "pooled_rotation_error_deg": {
+          "count": 1768,
+          "mean": 0.3201824346451214,
+          "p95": 0.6964127896139851,
+          "max": 4.278909849141853,
+          "rmse": 0.4172856220411392
+        }
+      }
+    }
+  ]
+}

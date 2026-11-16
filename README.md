@@ -10,8 +10,8 @@ MAVLink 驱动的光学动作捕捉仿真：支持单架 Crazyflie 2.1 和三架
 > 时间关联、Kalman 滤波等各环节算法与关键数值。
 >
 > 🖧 **分布式边缘检测架构**：[docs/edge_architecture.md](docs/edge_architecture.md)
-> 每相机连一个树莓派在边缘检测、中心融合的两级方案：数据切分、单网线双流
-> （点流+监控视频）、PTP 同步、等价性验证与真机部署对性能的影响。
+> 六路完整 600 帧切分等价验证、60 Hz 处理预算、单网线双流与曝光同步。
+> 当前 i7-1255U 中心融合平均 105.70 ms/组，尚不满足 60 Hz；详见实测与优化优先级。
 
 ```
 MAVLink 日志 / UDP  ──►  mocap-sim  ──►  scenario.json + rig/*.csv
