@@ -86,6 +86,8 @@ def main():
     parser.add_argument("--threshold", type=float, default=140)
     parser.add_argument("--blur-size", type=int, default=9)
     parser.add_argument("--max-err", type=float, default=6.0)
+    parser.add_argument("--h264-mbps", type=float, default=6.0,
+                        help="assumed hardware H.264 monitor encode rate per camera")
     parser.add_argument("--out", default=os.path.join(ROOT, "out", "rig3", "edge_equivalence.json"))
     args = parser.parse_args()
 
@@ -117,12 +119,20 @@ def main():
     records_c, records_e, point_payload_bytes = [], [], 0
     equal_frames = 0
     mismatch = None
+    frame_shape = None
     for frame_id, images in frames_per_camera(video_paths, frame_ids):
+        if frame_shape is None:
+            frame_shape = images[0].shape[:2]        # (height, width)
         # Centralised: detect all six in one place.
         central = [nodes[i].detect(image) for i, image in enumerate(images)]
         # Distributed: collect this frame's points from the edge nodes.
         while missing[frame_id]:
-            got = out_queue.get(timeout=120)
+            try:
+                got = out_queue.get(timeout=120)
+            except queue.Empty:
+                print(f"FAIL at frame {frame_id}: edge node(s) "
+                      f"{sorted(missing[frame_id])} never delivered points")
+                sys.exit(1)
             if got[0] is None:
                 continue
             f, cam, points = got
@@ -152,16 +162,15 @@ def main():
 
     # bit-for-bit fusion comparison
     identical = all(rec_c == rec_e for rec_c, rec_e in zip(records_c, records_e))
-    for i in range(6):
-        edges[i] = cv.VideoCapture(video_paths[i]) if isinstance(edges[i], cv.VideoCapture) and not edges[i].isOpened() else edges[i]
+    if equal_frames != len(frame_ids):
+        print(f"FAIL: only {equal_frames}/{len(frame_ids)} frames evaluated")
+        sys.exit(1)
 
     # ---- bandwidth figures ----
-    h, w = 1280, 800
-    raw_per_frame_per_cam = w * h            # 8-bit gray
-    raw_mbps = raw_per_frame_per_cam * 8 * pipeline.fps / 1e6
-    points_per_frame = point_payload_bytes / max(len(frame_ids), 1)
-    h264_per_frame_per_cam = 1.0e6 * 0.006 / pipeline.fps * 8  # ~0.6 MB/frame -> not a bitrate; recompute below
-    h264_bps_per_cam = 6e6                      # 6 Mbps 1080-ish monitor encode, conservative
+    h, w = frame_shape
+    raw_mbps = w * h * 8 * pipeline.fps / 1e6          # uncompressed 8-bit gray
+    points_per_frame = point_payload_bytes / max(equal_frames, 1)
+    h264_bps_per_cam = args.h264_mbps * 1e6
     total_point_mbps = points_per_frame * 8 * pipeline.fps / 1e6
 
     summary = {
@@ -173,7 +182,7 @@ def main():
         "points_kbps_per_cam": round(points_per_frame * pipeline.fps / 1024, 2),
         "points_total_mbps": round(total_point_mbps, 3),
         "raw_gray_mbps_per_cam": round(raw_mbps, 1),
-        "h264_monitor_mbps_per_cam": h264_bps_per_cam / 1e6,
+        "h264_monitor_mbps_per_cam": round(args.h264_mbps, 2),
         "single_1GbE_headroom_mbps": 1000 - (6 * (total_point_mbps + h264_bps_per_cam / 1e6)),
         "detections_per_frame": {str(i): round(np.mean([len(r["detections"][i]) for r in records_c]), 2)
                                  for i in range(6)},
@@ -186,7 +195,7 @@ def main():
     print(f"  frames checked   : {frame_ids} -> {equal_frames} evaluated")
     print(f"  fusion identical : {identical}  (edge detection reproduced centralised bit-for-bit)")
     print(f"  points payload   : {points_per_frame:.0f} B/frame all cams -> {summary['points_total_mbps']} Mbps")
-    print(f"  raw gray (no cc) : ~{raw_mbps:.0f} Mbps/cam ; H.264 monitor ~6 Mbps/cam")
+    print(f"  raw gray (no cc) : ~{raw_mbps:.0f} Mbps/cam ; H.264 monitor ~{args.h264_mbps:.0f} Mbps/cam")
     print(f"  6x(H.264+points) on one 1 GbE link leaves ~{summary['single_1GbE_headroom_mbps']:.0f} Mbps")
     print("wrote", args.out)
 
