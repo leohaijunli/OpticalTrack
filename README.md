@@ -18,6 +18,10 @@ MAVLink 驱动的光学动作捕捉仿真：支持单架 Crazyflie 2.1 和三架
 >
 > **进一步优化试验**：[docs/further_optimization.md](docs/further_optimization.md)
 > 可选浮点质心把位置均值降到 1.09/1.43/1.42 mm，但覆盖略降、A 最大误差上升；默认仍为整数模式。
+>
+> **失锁与畸变尖峰**：[docs/spike_robustness.md](docs/spike_robustness.md)
+> 参考三角形形状门（2 mm）+ 重捕获协方差膨胀（5×）把最大误差压到 6.5/8.7/6.4 mm（整数）；
+> 代价是三机同时可用率下降约 4.7 个百分点。
 
 ```
 MAVLink 日志 / UDP  ──►  mocap-sim  ──►  scenario.json + rig/*.csv
@@ -40,7 +44,8 @@ MAVLink 日志 / UDP  ──►  mocap-sim  ──►  scenario.json + rig/*.csv
   误差来源：[error_source_audit.md](out/rig3/error_source_audit.md)。
 - 三架机的亮斑均经实体杆连接到中心板，安装坐标为 `out/rig3/rig_blender.json` 中的 `mount`。
 
-算法基线是 Low-Cost-Mocap 的 5 px 极线候选搜索、DLT 和 Kalman `statePre` 输出；
+算法基线是 Low-Cost-Mocap 的 5 px 极线候选搜索、DLT 和 9 状态 Kalman 滤波
+（输出为该采样时刻的后验状态）；
 匹配器保持上游的顶点/底边遍历顺序，只是把"等腰三标记"推广为**每机 4 标记**的刚体
 签名：前 3 个组成参考三角形（保留上游顶点/底边搜索与基边轴航向），第 4 个为非共面标记，
 用于身份及底边顺序确认，4 个匹配点共同参与 Kabsch 6-DOF 拟合。
@@ -68,9 +73,13 @@ MAVLink 日志 / UDP  ──►  mocap-sim  ──►  scenario.json + rig/*.csv
 复现当前视频：
 
 ```bat
-.venv\Scripts\python.exe tools\evaluate_multi_video.py --position-reference body_origin --max-err 6
-.venv\Scripts\python.exe tools\accuracy_stats3.py
-.venv\Scripts\python.exe tools\make_multi_curve_video.py --out out\video\fused_tracking_error_body_origin.mp4
+:: 当前误差曲线视频由浮点质心 + 形状门结果重制
+.venv\Scripts\python.exe tools\evaluate_multi_video.py --position-reference body_origin --max-err 6 ^
+    --centroid-mode subpixel --out-prefix out\rig3\tracking_subpixel_v3
+.venv\Scripts\python.exe tools\accuracy_stats3.py --cache out\rig3\tracking_subpixel_v3.json ^
+    --out-prefix out\rig3\accuracy_subpixel_v3
+.venv\Scripts\python.exe tools\make_multi_curve_video.py --cache out\rig3\tracking_subpixel_v3.json ^
+    --out out\video\fused_tracking_error_body_origin.mp4
 .venv\Scripts\python.exe tools\compare_reference_tracking.py
 .venv\Scripts\python.exe -m unittest tests.test_mocap_adapter tests.test_video_evaluation
 ```
@@ -300,23 +309,41 @@ triangulation rms : 0.0377 px (mean over 7200 marker-frames)
 24 mm 标记在 5–7 m 处直径约 3–5 px，
 与真实 OV9281 + 2.8 mm 镜头的成像尺度一致。
 
-### 实际视频精度（机体原点，`out/rig3/accuracy3.json`，MP4 像素）
+### 实际视频精度（机体原点，MP4 像素）
+
+当前默认参数（整数质心，`out/rig3/accuracy_integer_v3.json`）：
 
 | 机体 | 覆盖 | 位置误差 (mm) | 测速 MAE/RMSE (m/s) | 航向 (°) | 姿态（Kabsch） |
 |---|---|---|---|---|---|
-| T650-A | 98.3% | 3.51±0.84（max 13.11） | 0.036 / 0.057 | 2.5±6.6 | 原点 3.47 mm，角 0.21° |
-| T650-B | 100% | 3.37±0.86（max 8.71） | 0.043 / 0.069 | 2.3±2.5 | 原点 3.40 mm，角 0.38° |
-| T650-C | 96.5% | 4.30±1.55（max 17.01） | 0.041 / 0.065 | 2.2±3.2 | 原点 4.28 mm，角 0.36° |
+| T650-A | 97.2% | 3.43±0.49（max 6.52） | 0.036 / 0.055 | 2.6±6.6 | 原点 3.47 mm，角 0.21° |
+| T650-B | 97.5% | 3.35±0.83（max 8.71） | 0.044 / 0.071 | 2.3±2.6 | 原点 3.39 mm，角 0.38° |
+| T650-C | 94.2% | 4.04±0.57（max 6.36） | 0.038 / 0.062 | 2.3±3.2 | 原点 4.07 mm，角 0.31° |
 
-* `--max-err=6` 拒绝低质量参考三角形；原点 raw 最大误差 A/B/C 为 6.25/6.01/20.69 mm。
-* **同一参考点对比**：旧中点滤波输出用其测得的 `R` 与标记安装偏移转换到机体原点，
+浮点质心（`--centroid-mode subpixel`，`out/rig3/accuracy_subpixel_v3.json`）：
+
+| 机体 | 覆盖 | 位置误差 (mm) | 测速 MAE/RMSE (m/s) | 航向 (°) | 姿态（Kabsch） |
+|---|---|---|---|---|---|
+| T650-A | 97.0% | 0.96±0.42（max 3.39） | 0.035 / 0.056 | 2.6±6.6 | 原点 0.60 mm，角 0.10° |
+| T650-B | 99.2% | 1.40±0.98（max 7.32） | 0.042 / 0.069 | 2.3±2.6 | 原点 1.12 mm，角 0.25° |
+| T650-C | 94.3% | 1.10±0.67（max 5.49） | 0.036 / 0.061 | 2.3±3.2 | 原点 0.83 mm，角 0.14° |
+
+`±` 为标准差，`max` 为有解帧的最大误差。第三轮加入参考三角形形状门
+（`rigidity_tol = 2 mm`）和重捕获协方差膨胀（`reacquire_inflation = 5`）后，
+A/B/C 最大误差由 13.11/8.71/17.01 降到 6.52/8.71/6.36 mm（整数）、
+17.41/7.32/15.39 降到 3.39/7.32/5.49 mm（浮点）；代价是三机同时可用率由
+95.00%/94.50% 降到 90.33%/92.00%。机理、门限标定与完整 A/B 见
+[失锁重捕获与形状门](docs/spike_robustness.md)。
+
+* `--max-err=6` 拒绝低质量参考三角形；形状门再拒绝几何被拉弯的帧。
+* **同一参考点对比**（历史）：旧中点滤波输出用其测得的 `R` 与标记安装偏移转换到机体原点，
   再与新结果在共同有效帧上计分。KF 最大误差 A 89.65→13.11、B 53.48→8.71、
-  C 32.57→17.01 mm；覆盖帧数均保持 590/600/579。
-* 新滤波器仍采用上游 `statePre`，并保留可配置的 10 m/s 速度**测量幅值**上限。
+  C 32.57→17.01 mm；覆盖帧数均保持 590/600/579。该表见 `out/rig3/accuracy3.json`。
+* 滤波器输出的是该采样时刻的**后验**状态（代码显式读 `statePost`；`cv2 5.0` 的
+  `correct()` 会就地覆盖 `statePre`），并保留可配置的 10 m/s 速度**测量幅值**上限。
   该上限不是速度创新统计检验。改变参考点减轻了急转时偏置标记中点的运动耦合；
   剩余噪声、遮挡和预测滞后仍存在，不代表尖峰必须靠改变参考点才能改善。
 * 加速度来自 9 状态模型的预测状态；相对原点位置二阶后向差分，矢量误差 RMSE
-  A/B/C 为 1.18/1.59/1.17 m/s²，详见 `accuracy3.csv/json`。
+  A/B/C 为 1.18/1.59/1.17 m/s²（整数），详见 `accuracy_integer_v3.csv/json`。
 * 第 4 标记偶发被遮挡时退回三点解：本轮 5 帧由时间先验正确选支
   （`pose_disambiguation=temporal_prior`），无 180° 姿态翻转
 * 图像侧抽帧审计（`out/rig3/led_contrast_4marker.json`，帧 0/150/300/450/599）：

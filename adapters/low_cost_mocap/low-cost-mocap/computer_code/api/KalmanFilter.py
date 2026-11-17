@@ -5,13 +5,18 @@ import time
 
 class KalmanFilter:
     def __init__(self, num_objects, process_noise=1e-2, measurement_noise=1.0,
-                 reacquire_gap_s=0.5, sampling_frequency=60.0, max_speed=10.0):
+                 reacquire_gap_s=0.5, sampling_frequency=60.0, max_speed=10.0,
+                 reacquire_inflation=5.0):
         state_dim = 9
         measurement_dim = 6
         dt = 0.1
         self.max_speed = float(max_speed)
         if not np.isfinite(self.max_speed) or self.max_speed <= 0:
             raise ValueError("max_speed must be positive")
+        if not np.isfinite(reacquire_inflation) or reacquire_inflation < 0:
+            raise ValueError("reacquire_inflation must be non-negative")
+        self.reacquire_inflation = float(reacquire_inflation)
+        self.sampling_frequency = float(sampling_frequency)
         self.kalmans = []
         self.prev_measurement_time = 0
         self.prev_positions = []
@@ -100,6 +105,24 @@ class KalmanFilter:
                 self.low_pass_filter_xy[drone_index].buffered_data = np.empty((0, 2))
                 self.low_pass_filter_z[drone_index].buffered_data = np.empty((0, 1))
                 self.heading_low_pass_filter[drone_index].buffered_data = np.empty((0, 2))
+            else:
+                # A short dropout (below reacquire_gap_s) keeps the track, but
+                # the covariance left over from the last update no longer
+                # describes an estimate that was never measured for several
+                # frames.  Without this, a reacquiring frame is mostly the
+                # extrapolation: a body that decelerated during the gap keeps
+                # the stale velocity and lands centimetres away even though the
+                # fresh fix is millimetres from the truth.  Inflating in units
+                # of the measurement noise reopens exactly the states that
+                # went unobserved, and is scale-free in Q/R.
+                missed = int(round((now - last) * self.sampling_frequency)) - 1
+                if missed > 0 and self.reacquire_inflation:
+                    grow = self.reacquire_inflation * missed
+                    kalman.errorCovPost[:3, :3] += (
+                        grow * kalman.measurementNoiseCov[:3, :3]).astype(np.float32)
+                    kalman.errorCovPost[3:6, 3:6] += (
+                        grow * kalman.measurementNoiseCov[3:6, 3:6]).astype(np.float32)
+
             
             predicted_location = kalman.predict()[:3].T[0]
             distances_to_predicted_location = np.sqrt(np.sum((possible_new_positions - predicted_location)**2, axis=1))
@@ -117,7 +140,12 @@ class KalmanFilter:
             # cv2 >= 5.0 requires the measurement as an explicit column vector
             # (OpenCV 4.x accepted a flat (6,) array).
             kalman.correct(np.concatenate((new_pos, new_vel)).reshape(6, 1))
-            predicted_state = kalman.statePre[:, 0].copy()  # p, v, a at this capture
+            # The value reported for this capture is the posterior estimate.
+            # OpenCV's ``correct`` also writes ``statePre`` in place (5.x), so
+            # the historical read of ``statePre`` never actually returned the
+            # a-priori prediction; read ``statePost`` so the intent is explicit
+            # and version-independent.
+            predicted_state = kalman.statePost[:, 0].copy()  # p, v, a at this capture
 
             heading = possible_new_objects[closest_match_i]["heading"]
             # The base axis is pi-periodic. Filtering folded angles directly
@@ -145,7 +173,8 @@ class KalmanFilter:
             # unchanged so consumers see the accepted measurement's pose.
             measurement = possible_new_objects[closest_match_i]
             for key in ("pose_r", "pose_t", "pose_euler_zyx_deg", "pose_tilt_deg",
-                         "pose_rmse_m", "pose_mode", "pose_ambiguous", "pose_disambiguation", "markers_used",
+                         "pose_rmse_m", "pose_triangle_rmse_m", "pose_mode", "pose_ambiguous",
+                         "pose_disambiguation", "markers_used",
                         "marker_ids", "extra_residuals_m", "reference_ambiguous",
                         "name", "timestamp", "error", "position_reference", "base_midpoint_measured"):
                 if key in measurement:

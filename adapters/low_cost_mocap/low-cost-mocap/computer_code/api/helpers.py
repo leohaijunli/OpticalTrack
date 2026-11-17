@@ -223,6 +223,8 @@ class Cameras:
                 self.body_slots = {body_id: slot for slot, body_id in enumerate(self.body_ids)}
                 gate = float(os.environ.get("MOCAP_BODY_GATE_M", "0.5"))
                 self.body_extra_tol = float(os.environ.get("MOCAP_BODY_EXTRA_TOL", "0.05"))
+                rigidity = float(os.environ.get("MOCAP_BODY_RIGIDITY_TOL", "0.002"))
+                self.body_rigidity_tol = rigidity if rigidity > 0 else None
                 self.body_max_err = os.environ.get("MOCAP_BODY_MAX_ERR", "6.0") or None
                 self.body_max_err = None if self.body_max_err is None else float(self.body_max_err)
                 # Temporal association: a timestamped constant-velocity gate
@@ -303,7 +305,9 @@ class Cameras:
                                 tracker=self.body_tracker, timestamp=stamp,
                                 tol=float(os.environ.get("MOCAP_BODY_TOL", 0.025)),
                                 max_err=self.body_max_err,
-                                extra_tol=self.body_extra_tol, position_reference=self.position_reference)
+                                extra_tol=self.body_extra_tol,
+                                rigidity_tol=self.body_rigidity_tol,
+                                position_reference=self.position_reference)
                         else:
                             objects = locate_objects(object_points, errors)
                         measurements = ([dict(obj, droneIndex=self.body_slots[obj["droneIndex"]])
@@ -496,7 +500,8 @@ class Cameras:
             measurement_noise=float(os.environ.get("MOCAP_KALMAN_R", "1.0")),
             reacquire_gap_s=float(os.environ.get("MOCAP_REACQUIRE_GAP_S", "0.5")),
             sampling_frequency=float(os.environ.get("MOCAP_SOURCE_FPS", "30")),
-            max_speed=float(os.environ.get("MOCAP_MAX_SPEED_MPS", "10.0")))
+            max_speed=float(os.environ.get("MOCAP_MAX_SPEED_MPS", "10.0")),
+            reacquire_inflation=float(os.environ.get("MOCAP_REACQUIRE_INFLATION", "5.0")))
         if self.body_tracker is not None:
             self.body_tracker.reset()
 

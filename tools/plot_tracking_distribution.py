@@ -81,19 +81,36 @@ def number(value, signed=False):
     return "—" if value is None else (f"{value:+.3f}" if signed else f"{value:.3f}")
 
 
-def comparison_configuration(current, baseline, allow_centroid_change=False):
+def comparison_configuration(current, baseline, allow_centroid_change=False, allow_change=()):
+    """Reject comparisons whose configuration differs, except where asked.
+
+    ``allow_change`` names estimator parameters that a run is supposed to
+    change (a tuning A/B).  Everything else must still match, so an accidental
+    difference in calibration, frame range or detector setup is still caught.
+    """
     current, baseline = dict(current), dict(baseline)
     mode_current = current.pop("centroid_mode", "integer")
     mode_baseline = baseline.pop("centroid_mode", "integer")
     if mode_current not in ("integer", "subpixel") or mode_baseline not in ("integer", "subpixel"):
         raise ValueError("unsupported centroid mode in comparison input")
+    permitted = {}
+    for key in allow_change:
+        if key not in current and key not in baseline:
+            raise ValueError(f"--allow-change {key}: neither input records this parameter")
+        if current.get(key) != baseline.get(key):
+            permitted[key] = {"current": current.get(key), "baseline": baseline.get(key)}
+        current.pop(key, None)
+        baseline.pop(key, None)
     if current != baseline:
-        raise ValueError("comparison requires matching configuration apart from an explicitly allowed centroid change")
+        differing = sorted(key for key in set(current) | set(baseline)
+                           if current.get(key) != baseline.get(key))
+        raise ValueError("comparison requires matching configuration apart from an explicitly "
+                         f"allowed centroid change; still differing: {', '.join(differing)}")
     if mode_current != mode_baseline:
         if not allow_centroid_change:
             raise ValueError("different centroid modes require --allow-centroid-change")
-        return {"centroid_mode": {"current": mode_current, "baseline": mode_baseline}}
-    return {}
+        permitted["centroid_mode"] = {"current": mode_current, "baseline": mode_baseline}
+    return permitted
 
 
 def plot_distributions(bodies, data, previous, stats, frame_count, fps, prefix, camera_count,
@@ -180,11 +197,15 @@ def main():
     parser.add_argument("--out-prefix", type=Path, default=ROOT / "out/rig3/position_error_distribution")
     parser.add_argument("--allow-centroid-change", action="store_true",
                         help="compare integer/subpixel modes; all other parameters must still match")
+    parser.add_argument("--allow-change", action="append", default=[], metavar="KEY",
+                        help="configuration key this comparison is meant to change (repeatable); "
+                             "every other key must still match")
     args = parser.parse_args()
     current = json.loads(args.cache.read_text(encoding="utf-8"))
     previous = json.loads(args.baseline.read_text(encoding="utf-8"))
     changes = comparison_configuration(current["summary"]["configuration"],
-                                       previous["summary"]["configuration"], args.allow_centroid_change)
+                                       previous["summary"]["configuration"], args.allow_centroid_change,
+                                       args.allow_change)
     for key in ("geometry_sha256", "selected_frames", "provenance", "truth_source"):
         if current["summary"][key] != previous["summary"][key]:
             raise ValueError(f"comparison requires matching {key}")
@@ -246,8 +267,9 @@ def main():
         writer.writeheader()
         writer.writerows(rows)
     labels = {"integer": "整数质心", "subpixel": "浮点质心"}
-    current_label, baseline_label = ("优化后", "优化前") if not changes else (
-        labels[changes["centroid_mode"]["current"]], labels[changes["centroid_mode"]["baseline"]])
+    centroid = changes.get("centroid_mode")
+    current_label, baseline_label = ("优化后", "优化前") if not centroid else (
+        labels[centroid["current"]], labels[centroid["baseline"]])
     plot_distributions(bodies, data, old_data, statistics, len(frames), fps, args.out_prefix,
                        len(current["summary"]["camera_names"]), current_label, baseline_label)
     for stats in statistics.values():

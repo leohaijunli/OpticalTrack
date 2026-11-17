@@ -132,6 +132,8 @@ Start" 后，"Rig identity & pose" 面板实时显示每架机的锁定状态、
 | `MOCAP_REACQUIRE_GAP_S` | 0.5（启动脚本） | 预测/姿态先验失效时长（秒） |
 | `MOCAP_SOURCE_FPS` | 30（启动脚本） | 源帧率（回放节拍与 Kalman 采样率） |
 | `MOCAP_BODY_MAX_ERR` | 6.0 | 参考三角形重投影 MSE 上限（px²） |
+| `MOCAP_BODY_RIGIDITY_TOL` | 2.0e-3 | 参考三角形形状残差上限（米），超限整帧丢弃；0 关闭 |
+| `MOCAP_REACQUIRE_INFLATION` | 5.0 | 重捕获时每丢一帧膨胀的位置/速度协方差，单位是测量噪声 R；0 关闭 |
 | `MOCAP_MAX_SPEED_MPS` | 10.0 | 所选参考点的速度测量幅值上限（m/s） |
 | `MOCAP_POSITION_REFERENCE` | `body_origin` | 机体原点；`base_midpoint` 可复现旧参考点 |
 
@@ -145,9 +147,11 @@ Python `TrackingPipeline` 也显式接收这三个参数；`locate_bodies` 的�
   `_capture_lock` 串行共享，无 FFmpeg 并发崩溃。
 - 原点模式的位姿须有第 4 标记或新鲜时间先验消歧；无确认的三点解记为无解。
   空帧更新失锁状态，回放倒退或循环会重置跟踪纪元。
-- 离线全量口径（600 帧）：原点位置均值 A/B/C 3.51/3.37/4.30 mm，
-  最大 13.11/8.71/17.01 mm；测速 MAE 0.036/0.043/0.041 m/s，
-  覆盖 98.3%/100%/96.5%，详见主 README 与 `out/rig3/accuracy3.json`。
+- 离线全量口径（600 帧，第三轮默认参数）：原点位置均值 A/B/C 3.43/3.35/4.04 mm，
+  最大 6.52/8.71/6.36 mm；测速 MAE 0.036/0.044/0.038 m/s，
+  覆盖 97.2%/97.5%/94.2%，详见主 README 与 `out/rig3/accuracy_integer_v3.json`。
+  浮点质心对应 0.96/1.40/1.10 mm（max 3.39/7.32/5.49），见
+  `out/rig3/accuracy_subpixel_v3.json` 与 [失锁尖峰报告](../../docs/spike_robustness.md)。
 - `tools/verify_body_origin_app.py` 从运行中的 MJPEG/Socket.IO 服务核验原点和 p/v/a；
   该可选验证脚本需 `requests` 与 `python-socketio` 客户端依赖。
 - `fundamental_from_projections` 与 OpenCV 一致（真匹配点极线距离 0）。
@@ -160,7 +164,12 @@ Python `TrackingPipeline` 也显式接收这三个参数；`locate_bodies` 的�
   与 [部署评估](../../docs/edge_architecture.md)。
 - **优化后精度**：完整视频重新定位的误差直方图、CDF 和 XYZ 分量见
   [误差分布报告](../../docs/position_accuracy_optimized.md)，输出为 `tracking_optimized.*` 与
-  `accuracy_optimized.*`。滤波位置逐帧与原基线相同；精度报告中的 30 fps 是采样时间轴。
+  `accuracy_optimized.*`；第三轮默认参数的结果为 `tracking_integer_v3.*` /
+  `tracking_subpixel_v3.*`。精度报告中的 30 fps 是采样时间轴。
+- **失锁与畸变门**：`MOCAP_BODY_RIGIDITY_TOL=2 mm` 会整帧丢弃几何被拉弯的参考三角形
+  （覆盖换尾部），`MOCAP_REACQUIRE_INFLATION=5` 在丢帧后按帧数膨胀协方差。
+  两者都以本套标定/分辨率为前提；换镜头、距离或标记尺寸后必须重测形状残差分布，
+  不能直接沿用 2 mm。见 [失锁尖峰报告](../../docs/spike_robustness.md)。
 - **浮点质心模式**：独立入口可加 `--centroid-mode subpixel`，应用启动前设置
   `MOCAP_CENTROID_MODE=subpixel`。显示标注取整不影响传入融合的浮点坐标；
   `/api/tracking-config` 上报所选模式。其均值更小但存在覆盖与尖峰取舍，默认保持整数，

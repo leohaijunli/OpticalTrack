@@ -233,18 +233,27 @@ def _pose_fields(rotation, translation, rmse, body_id, marker_ids, mode, toleran
     }
 
 
-def _rigid_assignment(points, tpl, apex_i, base_order, blocked, extra_tol):
+def _rigid_assignment(points, tpl, apex_i, base_order, blocked, extra_tol,
+                      extra_refit_margin=None):
     """Fit the reference triangle, then find its declared extra markers.
 
     ``base_order`` fixes which world point is the first/second base marker.
     The two orders are geometrically indistinguishable from three points of
     an isosceles triangle, so the caller evaluates both and keeps the one the
     extras support.
+
+    ``extra_refit_margin`` is an optional acceptance test for the extra
+    markers that uses evidence the pre-fit search cannot see: a marker that
+    belongs to a *different* body can sit inside ``extra_tol`` of the predicted
+    position and still be geometrically inconsistent with the template.  When
+    the four-point Kabsch residual grows by more than this margin (metres)
+    over the three-point residual, the extra is rejected and the triangle pose
+    is kept.
     """
     apex, (b0, b1) = tpl["apex"], tpl["base_pair"]
     local3 = tpl["locals"][[apex, b0, b1]]
     world3 = points[[apex_i, base_order[0], base_order[1]]]
-    rotation, translation, rmse = rigid_pose(local3, world3)
+    rotation, translation, triangle_rmse = rigid_pose(local3, world3)
 
     used = {int(apex_i), int(base_order[0]), int(base_order[1])}
     local_idx = [apex, b0, b1]
@@ -263,17 +272,29 @@ def _rigid_assignment(points, tpl, apex_i, base_order, blocked, extra_tol):
 
     if extra_distance:
         rotation, translation, rmse = rigid_pose(tpl["locals"][local_idx], points[world_idx])
+        if (extra_refit_margin is not None and
+                rmse > triangle_rmse + extra_refit_margin):
+            # The extra marker is not consistent with the rigid body.  Keep the
+            # reference triangle, whose fit the extras did not have to explain.
+            local_idx = local_idx[:3]
+            world_idx = world_idx[:3]
+            rotation, translation, rmse = rigid_pose(
+                tpl["locals"][local_idx], points[world_idx])
+            extra_distance = []
+    else:
+        rmse = triangle_rmse
     ids = [tpl["marker_ids"][i] for i in local_idx]
     mode = "rigid" if extra_distance else "triangle3"
     # Euler conversion and JSON-facing fields are needed only for the winning
     # branch. Keep numeric evidence here while the two base orders compete.
     return {"pose_r": rotation, "pose_t": translation, "pose_rmse_m": rmse,
+            "pose_triangle_rmse_m": triangle_rmse,
             "pose_mode": mode, "marker_ids": ids,
             "extra_residuals_m": extra_distance, "_used_points": tuple(world_idx)}
 
 
 def _assign_geometry(points, tpl, apex_i, base, blocked, extra_tol,
-                     rotation_prior=None):
+                     rotation_prior=None, extra_refit_margin=None):
     """Pick the base order and extras that the rigid body supports best."""
     if "locals" not in tpl or not tpl.get("extras"):
         # Three-point vectors carry no declared identity or base order, so the
@@ -288,8 +309,10 @@ def _assign_geometry(points, tpl, apex_i, base, blocked, extra_tol,
                 "pose_ambiguous": True, "pose_disambiguation": "unresolved",
                 "_used_points": (),
                 "extra_residuals_m": []}
-    first = _rigid_assignment(points, tpl, apex_i, base, blocked, extra_tol)
-    second = _rigid_assignment(points, tpl, apex_i, (base[1], base[0]), blocked, extra_tol)
+    first = _rigid_assignment(points, tpl, apex_i, base, blocked, extra_tol,
+                              extra_refit_margin)
+    second = _rigid_assignment(points, tpl, apex_i, (base[1], base[0]), blocked, extra_tol,
+                               extra_refit_margin)
     # More extras matched wins, then lower rigid-fit residual. Without extra
     # evidence, a fresh prior chooses the orientation branch. The upstream
     # base-midpoint/undirected-heading measurement is unchanged by this choice.
@@ -315,6 +338,7 @@ def _assign_geometry(points, tpl, apex_i, base, blocked, extra_tol,
     fields = _pose_fields(selected["pose_r"], selected["pose_t"], selected["pose_rmse_m"],
                           tpl["body_id"], selected["marker_ids"], selected["pose_mode"], extra_tol)
     fields["extra_residuals_m"] = selected["extra_residuals_m"]
+    fields["pose_triangle_rmse_m"] = selected["pose_triangle_rmse_m"]
     fields["_used_points"] = selected["_used_points"]
     if use_prior:
         fields["pose_disambiguation"] = "temporal_prior"
@@ -367,6 +391,7 @@ def _locate_one(points, errors, distance_matrix, dist1, dist2, tol,
 def locate_bodies(object_points, errors, templates, tracker=None,
                   tol=TOL_DEFAULT, frame=0, dt=1.0 / 30.0, max_err=None,
                   timestamp=None, extra_tol=EXTRA_TOL_DEFAULT,
+                  rigidity_tol=None, extra_refit_margin=None,
                   position_reference="base_midpoint",
                   **_ignored):
     """Run the upstream matcher once per body signature.
@@ -379,6 +404,13 @@ def locate_bodies(object_points, errors, templates, tracker=None,
     ``timestamp`` is the actual capture time in seconds; frame*dt is only a
     compatibility fallback for fixed-rate offline callers.
     ``extra_tol`` is the rigid prediction budget for non-reference markers.
+    ``rigidity_tol`` (metres, optional) rejects a candidate whose reference
+    triangle does not match the template shape.  A wrong correspondence can
+    still triangulate with a low reprojection error while bending the triangle,
+    and a bent triangle puts the body origin tens of millimetres away, so the
+    shape residual is the only cheap evidence that the fix is unusable.
+    ``extra_refit_margin`` (metres, optional) rejects an extra marker that the
+    four-point Kabsch cannot reconcile with the reference triangle.
     ``position_reference`` selects the point consumed by the motion gate and
     output as ``pos``. Body-origin tracking requires a resolved rigid pose;
     an unresolved three-point pose cannot silently change the reference point.
@@ -401,6 +433,11 @@ def locate_bodies(object_points, errors, templates, tracker=None,
         raise ValueError("non-finite input point or reprojection error")
     if not np.isfinite(extra_tol) or extra_tol <= 0:
         raise ValueError("extra_tol must be positive")
+    if rigidity_tol is not None and (not np.isfinite(rigidity_tol) or rigidity_tol <= 0):
+        raise ValueError("rigidity_tol must be positive when given")
+    if extra_refit_margin is not None and (not np.isfinite(extra_refit_margin)
+                                           or extra_refit_margin <= 0):
+        raise ValueError("extra_refit_margin must be positive when given")
     capture_time = float(timestamp) if timestamp is not None else float(frame) * float(dt)
     if not np.isfinite(capture_time):
         raise ValueError("capture timestamp must be finite")
@@ -431,10 +468,17 @@ def locate_bodies(object_points, errors, templates, tracker=None,
                     and not tracker.would_accept(obj, tpl["body_id"])):
                 continue
             geometry = _assign_geometry(points, tpl, obj["apex_i"], obj["base"],
-                                        already_matched, extra_tol, rotation_prior)
+                                        already_matched, extra_tol, rotation_prior,
+                                        extra_refit_margin)
             geometry["body_id"] = tpl["body_id"]
             obj["base_midpoint_measured"] = obj["pos"].copy()
             obj["position_reference"] = position_reference
+            if (rigidity_tol is not None and
+                    geometry.get("pose_triangle_rmse_m") is not None and
+                    geometry["pose_triangle_rmse_m"] > rigidity_tol):
+                # The reference triangle itself is bent, so every point derived
+                # from this fit (including the body origin) is unreliable.
+                continue
             if position_reference == "body_origin":
                 if (geometry.get("pose_t") is None or
                         geometry.get("pose_disambiguation") not in ("extra_marker", "temporal_prior")):

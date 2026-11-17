@@ -166,6 +166,12 @@ def main():
                         help="max per-body single-frame jump (m) before a blip is dropped")
     parser.add_argument("--extra-tol", type=float, default=0.05,
                         help="rigid prediction budget for non-reference markers (m)")
+    parser.add_argument("--rigidity-tol", type=float, default=0.002,
+                        help="reject a fix whose reference-triangle shape residual exceeds this (m); "
+                             "0 or negative disables the gate")
+    parser.add_argument("--reacquire-inflation", type=float, default=5.0,
+                        help="Kalman covariance reopened per missed frame, in units of the "
+                             "measurement noise; 0 disables it")
     parser.add_argument("--max-err", type=float, default=6.0,
                         help="drop a matched triangle whose mean reprojection MSE (px^2) exceeds this")
     parser.add_argument("--out-prefix", default=os.path.join(ROOT, "out", "rig3", "tracking_from_video"))
@@ -183,13 +189,22 @@ def main():
         parser.error(str(error))
     if not np.isfinite(args.fps) or args.fps <= 0:
         parser.error("fps must be positive")
+    if not np.isfinite(args.rigidity_tol):
+        parser.error("rigidity tolerance must be finite")
+    if args.rigidity_tol <= 0:
+        args.rigidity_tol = None  # explicit opt-out of the rigid-shape gate
+    if not np.isfinite(args.reacquire_inflation) or args.reacquire_inflation < 0:
+        parser.error("reacquire inflation must be non-negative")
     start, end = frame_ids[0], frame_ids[-1]
     pipeline = TrackingPipeline(os.path.join(args.rig_dir, "cameras_calib.json"),
                                 os.path.join(args.rig_dir, "rig_blender.json"),
                                 threshold=args.threshold, blur_size=args.blur_size,
                                 tolerance=args.tol, fps=args.fps,
                                 gate_m=args.gate_m, max_err=args.max_err,
-                                extra_tol=args.extra_tol, position_reference=args.position_reference,
+                                extra_tol=args.extra_tol,
+                                rigidity_tol=args.rigidity_tol,
+                                reacquire_inflation=args.reacquire_inflation,
+                                position_reference=args.position_reference,
                                 max_speed=args.max_speed, centroid_mode=args.centroid_mode)
     truth_poses = trajectory_poses(args.trajectory)
     offsets = {t["body_id"]: (t["base_mid_local"] if args.position_reference == "base_midpoint"

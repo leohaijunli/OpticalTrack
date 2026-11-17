@@ -100,7 +100,8 @@ CAM06 OV9281 ──短 CSI── Edge06 ──1 GbE──┘                   �
 ```
 
 点流单向发送，不应把网络往返 RTT 当作必经延迟。输出需同时带采样时间、发布时间与数据年龄；
-当前 `statePre` 是采样时刻的先验估计，不是自动预测到网络接收时刻的状态。
+当前滤波器输出的是**该采样时刻的后验状态**（`correct()` 之后的 `statePost`），
+不是自动预测到网络接收时刻的状态。
 
 第二轮中心纯点输入实测保存在 `out/rig3/fusion_round2_final.json`；第一轮记录保留为
 `out/rig3/fusion_optimized.json`。

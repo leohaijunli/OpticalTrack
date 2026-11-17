@@ -146,8 +146,13 @@ position_reference = body_origin：
 - **9 状态**：`[px, py, pz, vx, vy, vz, ax, ay, az]`（位置/速度/加速度）。
 - 转移矩阵含 `dt`（当前帧真实时间差）：位置 += 速度·dt + ½·加速度·dt²；
   速度 += 加速度·dt；加速度为随机游走。
-- 测量为位置 + 速度（6 维）；**输出取 `statePre`**（上游约定）。
+- 测量为位置 + 速度（6 维）；输出取 `correct()` 之后的状态（即**后验**）。
+  代码显式读 `statePost`：`cv2 5.0` 的 `correct()` 会就地覆盖 `statePre`，
+  旧代码读 `statePre` 得到的其实是同一个后验向量，见[第三轮 §6](spike_robustness.md)。
 - 速度测量幅值上限 `max_speed = 10 m/s`（可配置，**不是**创新统计检验）。
+- 短时丢帧后（`reacquire_gap_s = 0.5 s` 以内）按丢帧数膨胀位置/速度协方差
+  （`reacquire_inflation = 5`，单位是测量噪声 R）；`0` 关闭。见
+  [第三轮](spike_robustness.md)。
 - 速度另经上游 Butterworth 低通；姿态/身份证据原样透传。
 - 标量加速真值来自「同一参考点的二阶后向差分」。
 
@@ -170,7 +175,8 @@ position_reference = body_origin：
 | 主点 | `(W−1)/2` | OpenCV/渲染像素中心约定，消除 −0.5 px 偏移 |
 | 参考点 | 机体原点 `(0,0,0)` | 急转时偏置的底边中点含旋转耦合；原点更贴近整机运动 |
 | 二义消解 | 第 4 标记 + 旋转测地距离时间先验 | 等腰三角形底边交换 = 180° 旋转，三点不可区分 |
-| 状态 | 9 状态 `[p,v,a]` | 加速度有建模；输出 `statePre` 保持上游约定 |
+| 状态 | 9 状态 `[p,v,a]` | 加速度有建模；输出 `correct()` 后的后验（显式读 `statePost`） |
+| 丢帧安全 | `rigidity_tol = 2 mm` + `reacquire_inflation = 5` | 形状门拒畸变三角形；膨胀避免重捕获时被旧速度拖住 |
 | 过滤 | `max_err ≤ 6 px²` | 拒低质量三角形，raw 最大误差大幅下降 |
 | 并发取流 | `_capture_lock` 节流共享 | 多客户端并发 `VideoCapture.read` 会触发 FFmpeg 崩溃 |
 | 数据格式 | 原生 int 索引 + `_jsonable` | 服务器 emit JSON，避免 `np.int64` 序列化崩溃 |

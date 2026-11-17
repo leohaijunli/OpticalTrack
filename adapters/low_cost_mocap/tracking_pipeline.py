@@ -67,6 +67,7 @@ class TrackingPipeline:
                  min_area=3, max_area=200, blur_size=9, tolerance=0.025,
                  fps=30.0, process_noise=1.0, measurement_noise=1.0,
                   reacquire_gap_s=0.5, gate_m=0.5, max_err=6.0, extra_tol=0.05,
+                  rigidity_tol=0.002, reacquire_inflation=5.0,
                   position_reference="body_origin", max_speed=10.0, centroid_mode="integer"):
         if blur_size < 1 or blur_size % 2 != 1:
             raise ValueError("blur_size must be a positive odd integer")
@@ -84,6 +85,8 @@ class TrackingPipeline:
         self.fps = float(fps)
         self.max_err = None if max_err is None else float(max_err)
         self.extra_tol = float(extra_tol)
+        self.rigidity_tol = None if rigidity_tol is None else float(rigidity_tol)
+        self.reacquire_inflation = float(reacquire_inflation)
         if position_reference not in POSITION_REFERENCES:
             raise ValueError(f"unknown position_reference: {position_reference}")
         self.position_reference = position_reference
@@ -96,14 +99,19 @@ class TrackingPipeline:
             "fps": self.fps, "motion_gate_m": gate_m if self.tracker else None,
             "mean_reprojection_mse_limit_px2": self.max_err,
             "extra_marker_tolerance_m": self.extra_tol,
-            "reacquire_gap_s": reacquire_gap_s, "process_noise": process_noise,
+            "rigidity_tolerance_m": self.rigidity_tol,
+            "reacquire_gap_s": reacquire_gap_s, "reacquire_inflation": self.reacquire_inflation,
+            "process_noise": process_noise,
             "measurement_noise": measurement_noise}
         self.configuration.update({
             "position_reference": position_reference,
             "position_reference_description": POSITION_REFERENCE_LABELS[position_reference],
             "max_speed_mps": self.max_speed,
             "kalman_state": ["px", "py", "pz", "vx", "vy", "vz", "ax", "ay", "az"],
-             "kalman_output": "statePre; velocity additionally Butterworth-filtered"})
+            "kalman_output": ("posterior state of the accepted capture "
+                              "(p, v, a); velocity additionally Butterworth-filtered"),
+            "rigidity_gate_description": ("reject a fix whose reference triangle bends "
+                                          "beyond this shape residual (metres)")})
         # Keep the historical integer configuration unchanged for old cached
         # regression inputs. Nondefault detection mode is always recorded.
         if centroid_mode != "integer":
@@ -118,7 +126,8 @@ class TrackingPipeline:
         self.kalman = KalmanFilter(len(self.templates), process_noise,
                                    measurement_noise, reacquire_gap_s,
                                    sampling_frequency=self.fps,
-                                   max_speed=self.max_speed)
+                                   max_speed=self.max_speed,
+                                   reacquire_inflation=self.reacquire_inflation)
 
     def process(self, frames, timestamp):
         if len(frames) != len(self.poses):
@@ -142,7 +151,8 @@ class TrackingPipeline:
                                 tracker=self.tracker, tol=self.tolerance,
                                 frame=self._frame, dt=1.0 / self.fps,
                                 max_err=self.max_err, timestamp=float(timestamp),
-                                 extra_tol=self.extra_tol, position_reference=self.position_reference)
+                                 extra_tol=self.extra_tol, position_reference=self.position_reference,
+                                 rigidity_tol=self.rigidity_tol)
         self._frame += 1
         # Repository Kalman indices are contiguous; external body IDs need
         # not be.  Translate only at this boundary, not in the algorithm.

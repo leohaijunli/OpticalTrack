@@ -407,6 +407,101 @@ class RigidBodyExtensionTests(unittest.TestCase):
             directory.cleanup()
 
 
+class TrackingRobustnessTests(unittest.TestCase):
+    """Guards against fixes that look good per camera but are geometrically wrong."""
+
+    BODY = RigidBodyExtensionTests.BODY
+
+    def _templates(self):
+        return RigidBodyExtensionTests.templates([self.BODY])
+
+    def test_rigidity_gate_rejects_a_scaled_reference_triangle(self):
+        # A 3-D point set has 6 rigid degrees of freedom, so bending a single
+        # vertex or shearing one edge is absorbed almost entirely by the fitted
+        # rotation/translation: the residual stays at the 0.1 mm level while the
+        # body origin moves millimetres.  A uniform scale cannot be absorbed,
+        # so it is the cheapest honest probe of the shape gate.
+        directory, templates = self._templates()
+        try:
+            origin = np.array([0.4, -0.2, 1.5])
+            locals_ = templates[0]["locals"]
+
+            mild = locals_ * 1.005 + origin
+            accepted = locate_bodies(mild, np.zeros(4), templates, timestamp=0.0,
+                                     position_reference="body_origin",
+                                     rigidity_tol=0.002)
+            self.assertEqual(len(accepted), 1)
+            self.assertLess(accepted[0]["pose_triangle_rmse_m"], 0.002)
+            self.assertAlmostEqual(accepted[0]["pose_triangle_rmse_m"], 0.00094, places=4)
+
+            coarse = locals_ * 1.02 + origin
+            self.assertEqual(locate_bodies(coarse, np.zeros(4), templates, timestamp=0.0,
+                                           position_reference="body_origin",
+                                           rigidity_tol=0.002), [])
+            # The rejected fix is not merely "slightly worse": without the gate
+            # it would have been reported as a confident 3.7 mm-level fix.
+            ungated = locate_bodies(coarse, np.zeros(4), templates, timestamp=0.0,
+                                    position_reference="body_origin")
+            self.assertEqual(len(ungated), 1)
+            self.assertGreater(ungated[0]["pose_triangle_rmse_m"], 0.0037)
+            self.assertGreater(np.linalg.norm(np.asarray(ungated[0]["pos"]) - origin), 0.0035)
+
+            with self.assertRaises(ValueError):
+                locate_bodies(mild, np.zeros(4), templates, rigidity_tol=0.0)
+        finally:
+            directory.cleanup()
+
+    def test_reacquisition_inflation_trusts_the_new_fix(self):
+        # A body decelerating hard while unobserved: the last accepted velocity
+        # is 1.2 m/s, the body is nearly stopped.  Four missed frames are well
+        # inside reacquire_gap_s, so this is a coast-and-update, not a restart.
+        fps = 30.0
+        positions, x = [], 0.0
+        for frame in range(60):
+            positions.append(x)
+            x += 0.04 if frame < 20 else 0.002
+        dropout = range(20, 24)
+
+        def measurement(value):
+            return [{"droneIndex": 0, "pos": np.array([value, 0.0, 1.0], np.float32),
+                     "heading": 0.0}]
+
+        def run(inflation):
+            kf = KalmanFilter(1, process_noise=1.0, measurement_noise=1.0,
+                              reacquire_gap_s=0.5, sampling_frequency=fps,
+                              max_speed=10.0, reacquire_inflation=inflation)
+            errors, reacquire = {}, None
+            for frame in range(60):
+                if frame in dropout:
+                    continue
+                found = kf.predict_location(measurement(positions[frame]),
+                                            timestamp=frame / fps)
+                self.assertEqual(len(found), 1)
+                errors[frame] = 1000.0 * abs(float(found[0]["pos"][0]) - positions[frame])
+                if frame == 24:
+                    # reported state is the posterior of this capture
+                    np.testing.assert_allclose(
+                        found[0]["pos"], kf.kalmans[0].statePost[:3, 0], atol=1e-6)
+                    reacquire = found[0]["pos"]
+            return errors, reacquire
+
+        stale, _ = run(0.0)
+        trusting, trusting_pos = run(5.0)
+        self.assertGreater(stale[24], 30.0)     # 40.3 mm of coasted velocity
+        self.assertLess(trusting[24], 1.0)      # 0.6 mm: the new fix dominates
+        self.assertLess(max(v for f, v in trusting.items() if f >= 24), 3.0)
+        # With a reopened covariance the filter output is the measurement, not
+        # a blend with the stale prediction.
+        np.testing.assert_allclose(trusting_pos, measurement(positions[24])[0]["pos"],
+                                   atol=1e-3)
+        # Neither setting changes a steady track.
+        np.testing.assert_allclose([stale[f] for f in range(5, 20)],
+                                   [trusting[f] for f in range(5, 20)], atol=1e-9)
+
+        with self.assertRaises(ValueError):
+            KalmanFilter(1, reacquire_inflation=-1.0)
+
+
 class SourceBoundaryTests(unittest.TestCase):
     def _server_camera(self, directory):
         calibration = Path(directory) / "calibration.json"
